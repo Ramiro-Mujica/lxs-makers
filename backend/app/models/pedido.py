@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.models.usuario import Base
 
-ESTADO_PEDIDO_ENUM = Enum("pendiente", "en_proceso", "enviado", "entregado", name="estado_pedido")
+ESTADO_PEDIDO_ENUM = Enum("armando_pedido", "enviado", name="estado_pedido")
 
 
 class Pedido(Base):

@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 const API       = "http://127.0.0.1:8000";
 const COLORES   = ["#e94560", "#1a1a2e", "#f0a500", "#28a745", "#17a2b8"];
 const SECCIONES = ["perfil", "catalogo", "pedidos", "tableros", "estadisticas"];
+const MESES     = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
 function PanelVendedor() {
   const vendedorId = localStorage.getItem("userId");
@@ -145,11 +146,7 @@ function SeccionPerfil({ vendedorId }) {
       const res  = await fetch(`${API}/auth/perfil/${vendedorId}`);
       const data = await res.json();
       setPerfil(data);
-      setForm({
-        nombre_negocio: data.nombre_negocio || "",
-        descripcion:    data.descripcion    || "",
-        whatsapp:       data.whatsapp       || "",
-      });
+      setForm({ nombre_negocio: data.nombre_negocio || "", descripcion: data.descripcion || "", whatsapp: data.whatsapp || "" });
     };
     cargar();
   }, [vendedorId]);
@@ -172,7 +169,6 @@ function SeccionPerfil({ vendedorId }) {
     <div>
       <h2 style={styles.subtitulo}>Mi perfil</h2>
       {mensaje && <p style={styles.mensaje}>{mensaje}</p>}
-
       <div style={styles.card}>
         {!editando ? (
           <>
@@ -190,36 +186,18 @@ function SeccionPerfil({ vendedorId }) {
             </div>
             <div style={styles.perfilRow}>
               <span style={styles.perfilLabel}>Código de catálogo</span>
-              <span style={{ ...styles.perfilValor, fontWeight: "bold", color: "#e94560" }}>
-                {perfil.codigo_catalogo}
-              </span>
+              <span style={{ ...styles.perfilValor, fontWeight: "bold", color: "#e94560" }}>{perfil.codigo_catalogo}</span>
             </div>
-            <button style={styles.btnPrimario} onClick={() => setEditando(true)}>
-              Editar perfil
-            </button>
+            <button style={styles.btnPrimario} onClick={() => setEditando(true)}>Editar perfil</button>
           </>
         ) : (
           <>
             <label style={styles.perfilLabel}>Nombre del negocio</label>
-            <input
-              style={styles.input}
-              value={form.nombre_negocio}
-              onChange={(e) => setForm({ ...form, nombre_negocio: e.target.value })}
-            />
+            <input style={styles.input} value={form.nombre_negocio} onChange={(e) => setForm({ ...form, nombre_negocio: e.target.value })} />
             <label style={styles.perfilLabel}>Descripción del negocio</label>
-            <textarea
-              style={styles.textarea}
-              placeholder="Contale a tus clientes de qué trata tu tienda..."
-              value={form.descripcion}
-              onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-            />
+            <textarea style={styles.textarea} placeholder="Contale a tus clientes de qué trata tu tienda..." value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} />
             <label style={styles.perfilLabel}>WhatsApp (con código de país)</label>
-            <input
-              style={styles.input}
-              placeholder="ej: 5491112345678"
-              value={form.whatsapp}
-              onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
-            />
+            <input style={styles.input} placeholder="ej: 5491112345678" value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} />
             <div style={styles.variantesRow}>
               <button style={styles.btnPrimario}   onClick={guardar}>Guardar cambios</button>
               <button style={styles.btnSecundario} onClick={() => setEditando(false)}>Cancelar</button>
@@ -233,8 +211,8 @@ function SeccionPerfil({ vendedorId }) {
 
 // ─── Gestor de imágenes ───────────────────────────────────────────────
 function GestorImagenes({ productoId, imagenes, onActualizar }) {
-  const inputRef           = useRef();
-  const LIMITE             = 5;
+  const inputRef = useRef();
+  const LIMITE   = 5;
   const [subiendo, setSubiendo] = useState(false);
 
   const subirImagen = async (e) => {
@@ -278,10 +256,11 @@ function GestorImagenes({ productoId, imagenes, onActualizar }) {
 
 // ─── Sección Pedidos ──────────────────────────────────────────────────
 function SeccionPedidos({ vendedorId }) {
-  const [pedidos, setPedidos] = useState([]);
-  const [mensaje, setMensaje] = useState("");
+  const [pedidos,   setPedidos]   = useState([]);
+  const [mensaje,   setMensaje]   = useState("");
   const [formNuevo, setFormNuevo] = useState({ detalle: "", total: "" });
-  const [creando, setCreando] = useState(false);
+  const [creando,   setCreando]   = useState(false);
+  const [pedidoDesc, setPedidoDesc] = useState({});
 
   const cargar = async () => {
     const res = await fetch(`${API}/pedidos/vendedor/${vendedorId}`);
@@ -294,25 +273,21 @@ function SeccionPedidos({ vendedorId }) {
     const res  = await fetch(`${API}/pedidos/vendedor/${vendedorId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        datos_carrito: [{ detalle: formNuevo.detalle }],
-        total:         parseFloat(formNuevo.total),
-        usuario_id:    vendedorId,
-      }),
+      body: JSON.stringify({ detalle: formNuevo.detalle, total: parseFloat(formNuevo.total), usuario_id: vendedorId }),
     });
     const data = await res.json();
-    setMensaje(`Pedido creado. Código: ${data.codigo_seguimiento}`);
+    setMensaje(`Pedido creado. Código para el cliente: ${data.codigo_seguimiento}`);
     setFormNuevo({ detalle: "", total: "" });
     setCreando(false);
     cargar();
   };
 
-  const cambiarEstado = async (id, estado) => {
-    const comentario = estado === "enviado" ? prompt("Comentario (opcional):") || "" : "";
+  const marcarEnviado = async (id) => {
+    const desc = pedidoDesc[id] || "";
     const res  = await fetch(`${API}/pedidos/${id}/estado`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ estado_pedido: estado, comentario }),
+      body: JSON.stringify({ estado_pedido: "enviado", descripcion: desc }),
     });
     const data = await res.json();
     setMensaje(data.mensaje || data.detail);
@@ -320,11 +295,11 @@ function SeccionPedidos({ vendedorId }) {
   };
 
   const colorEstado = (estado) => ({
-    pendiente:  { bg: "#fff3cd", color: "#856404" },
-    en_proceso: { bg: "#cce5ff", color: "#004085" },
-    enviado:    { bg: "#d4edda", color: "#155724" },
-    entregado:  { bg: "#e2e3e5", color: "#383d41" },
+    armando_pedido: { bg: "#fff3cd", color: "#856404" },
+    enviado:        { bg: "#d4edda", color: "#155724" },
   }[estado] || { bg: "#f8f9fa", color: "#333" });
+
+  const labelEstado = (estado) => estado === "armando_pedido" ? "Armando pedido" : "Enviado";
 
   return (
     <div>
@@ -366,19 +341,26 @@ function SeccionPedidos({ vendedorId }) {
             <div style={styles.productoInfo}>
               <strong>Código: {p.codigo_seguimiento}</strong>
               <span style={{ ...styles.estadoBadge, backgroundColor: c.bg, color: c.color }}>
-                {p.estado_pedido.replace("_", " ").toUpperCase()}
+                {labelEstado(p.estado_pedido)}
               </span>
               <span style={styles.precio}>Total: ${p.total}</span>
+              {p.detalle && <span style={styles.desc}>Detalle: {p.detalle}</span>}
               <span style={styles.desc}>Vence en {p.dias_restantes} día(s)</span>
-              {p.comentario && <span style={styles.desc}>Comentario: {p.comentario}</span>}
-            </div>
-            <div style={styles.productoAcciones}>
-              <select style={styles.select} value={p.estado_pedido} onChange={(e) => cambiarEstado(p.id, e.target.value)}>
-                <option value="pendiente">Pendiente</option>
-                <option value="en_proceso">En proceso</option>
-                <option value="enviado">Enviado</option>
-                <option value="entregado">Entregado</option>
-              </select>
+              {p.descripcion && <span style={styles.desc}>📦 {p.descripcion}</span>}
+
+              {p.estado_pedido === "armando_pedido" && (
+                <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                  <input
+                    style={styles.input}
+                    placeholder="Código logístico o descripción de envío (opcional)"
+                    value={pedidoDesc[p.id] || ""}
+                    onChange={(e) => setPedidoDesc({ ...pedidoDesc, [p.id]: e.target.value })}
+                  />
+                  <button style={styles.btnEnviado} onClick={() => marcarEnviado(p.id)}>
+                    Marcar como enviado
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -491,59 +473,94 @@ function SeccionTableros({ vendedorId }) {
 
 // ─── Sección Estadísticas ─────────────────────────────────────────────
 function SeccionEstadisticas({ vendedorId }) {
-  const [stats, setStats] = useState(null);
+  const [stats,   setStats]   = useState(null);
+  const [mensaje, setMensaje] = useState("");
 
-  useEffect(() => {
-    const cargar = async () => {
-      const res = await fetch(`${API}/estadisticas/vendedor/${vendedorId}`);
-      setStats(await res.json());
-    };
+  const cargar = async () => {
+    const res = await fetch(`${API}/estadisticas/vendedor/${vendedorId}`);
+    setStats(await res.json());
+  };
+
+  useEffect(() => { cargar(); }, []);
+
+  const reiniciar = async () => {
+    if (!confirm("¿Reiniciar todas las estadísticas? Esta acción no se puede deshacer.")) return;
+    const res  = await fetch(`${API}/estadisticas/vendedor/${vendedorId}/reiniciar`, { method: "DELETE" });
+    const data = await res.json();
+    setMensaje(data.mensaje);
     cargar();
-  }, []);
+  };
 
   if (!stats) return <p style={styles.vacio}>Cargando estadísticas...</p>;
+
+  const totalGeneral  = stats.resumen.reduce((acc, r) => acc + r.total_ganancia, 0);
+  const pedidosTotal  = stats.resumen.reduce((acc, r) => acc + r.total_pedidos,  0);
+
+  // Datos para el gráfico: últimos 12 meses
+  const datosMeses = stats.resumen.flatMap((r) =>
+    r.meses.map((m) => ({
+      nombre:   `${MESES[m.mes - 1]} ${r.anio}`,
+      ganancia: m.total_ganancia,
+      pedidos:  m.total_pedidos,
+    }))
+  ).slice(0, 12).reverse();
 
   return (
     <div>
       <h2 style={styles.subtitulo}>Mis estadísticas</h2>
+      {mensaje && <p style={styles.mensaje}>{mensaje}</p>}
+
       <div style={styles.statsRow}>
         <div style={styles.statCard}>
-          <span style={styles.statNum}>${stats.total_ventas.toFixed(2)}</span>
+          <span style={styles.statNum}>${totalGeneral.toFixed(2)}</span>
           <span style={styles.statLabel}>Total ganado</span>
         </div>
         <div style={styles.statCard}>
-          <span style={styles.statNum}>{stats.total_pedidos_entregados}</span>
-          <span style={styles.statLabel}>Pedidos entregados</span>
+          <span style={styles.statNum}>{pedidosTotal}</span>
+          <span style={styles.statLabel}>Pedidos enviados</span>
         </div>
       </div>
 
-      {stats.productos.length === 0 && <p style={styles.vacio}>Aún no tenés ventas registradas.</p>}
-
-      {stats.productos.length > 0 && (
+      {stats.resumen.length === 0 ? (
+        <p style={styles.vacio}>Aún no tenés estadísticas registradas.</p>
+      ) : (
         <>
-          <h3 style={{ color: "#1a1a2e", marginTop: "2rem" }}>Productos más vendidos</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={stats.productos} margin={{ top: 10, right: 20, left: 0, bottom: 60 }}>
-              <XAxis dataKey="nombre" angle={-30} textAnchor="end" tick={{ fontSize: 12 }} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="total_cantidad" name="Unidades vendidas">
-                {stats.productos.map((_, i) => <Cell key={i} fill={COLORES[i % COLORES.length]} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-
-          <h3 style={{ color: "#1a1a2e", marginTop: "2rem" }}>Mayor ganancia por producto</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={stats.productos} margin={{ top: 10, right: 20, left: 0, bottom: 60 }}>
-              <XAxis dataKey="nombre" angle={-30} textAnchor="end" tick={{ fontSize: 12 }} />
+          {/* Gráfico mensual */}
+          <h3 style={{ color: "#1a1a2e", marginTop: "2rem" }}>Ganancia mensual</h3>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={datosMeses} margin={{ top: 10, right: 20, left: 0, bottom: 60 }}>
+              <XAxis dataKey="nombre" angle={-30} textAnchor="end" tick={{ fontSize: 11 }} />
               <YAxis />
               <Tooltip formatter={(v) => `$${v.toFixed(2)}`} />
-              <Bar dataKey="total_ganancia" name="Ganancia">
-                {stats.productos.map((_, i) => <Cell key={i} fill={COLORES[i % COLORES.length]} />)}
+              <Bar dataKey="ganancia" name="Ganancia">
+                {datosMeses.map((_, i) => <Cell key={i} fill={COLORES[i % COLORES.length]} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+
+          {/* Historial por año */}
+          <h3 style={{ color: "#1a1a2e", marginTop: "2rem" }}>Historial anual</h3>
+          {stats.resumen.map((r) => (
+            <div key={r.anio} style={styles.card}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <strong style={{ color: "#1a1a2e", fontSize: "1.1rem" }}>{r.anio}</strong>
+                <span style={styles.precio}>${r.total_ganancia.toFixed(2)} — {r.total_pedidos} pedidos</span>
+              </div>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                {r.meses.map((m) => (
+                  <div key={m.mes} style={styles.mesBadge}>
+                    <span style={styles.mesNombre}>{MESES[m.mes - 1]}</span>
+                    <span style={styles.mesValor}>${m.total_ganancia.toFixed(2)}</span>
+                    <span style={styles.mesPedidos}>{m.total_pedidos} pedidos</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <button style={styles.btnReiniciar} onClick={reiniciar}>
+            Reiniciar estadísticas
+          </button>
         </>
       )}
     </div>
@@ -576,6 +593,8 @@ const styles = {
   btnPrimario:      { backgroundColor: "#e94560", color: "#fff", border: "none", borderRadius: "8px", padding: "0.75rem", fontSize: "1rem", cursor: "pointer" },
   btnSecundario:    { backgroundColor: "#1a1a2e", color: "#fff", border: "none", borderRadius: "8px", padding: "0.6rem 1rem", fontSize: "0.9rem", cursor: "pointer" },
   btnEliminar:      { backgroundColor: "#dc3545", color: "#fff", border: "none", borderRadius: "8px", padding: "0.5rem 1rem", cursor: "pointer", fontSize: "0.9rem" },
+  btnEnviado:       { backgroundColor: "#28a745", color: "#fff", border: "none", borderRadius: "8px", padding: "0.5rem 1rem", cursor: "pointer", fontSize: "0.9rem" },
+  btnReiniciar:     { backgroundColor: "#dc3545", color: "#fff", border: "none", borderRadius: "8px", padding: "0.75rem 1.5rem", cursor: "pointer", fontSize: "0.9rem", marginTop: "1rem" },
   listaProductos:   { display: "flex", flexDirection: "column", gap: "1rem" },
   productoCard:     { backgroundColor: "#f9f9f9", borderRadius: "12px", padding: "1.25rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" },
   productoInfo:     { display: "flex", flexDirection: "column", gap: "0.25rem", flex: 1 },
@@ -609,6 +628,10 @@ const styles = {
   perfilRow:        { display: "flex", flexDirection: "column", gap: "0.2rem", padding: "0.5rem 0", borderBottom: "1px solid #eee" },
   perfilLabel:      { fontSize: "0.8rem", color: "#999", fontWeight: "bold", textTransform: "uppercase" },
   perfilValor:      { fontSize: "1rem", color: "#1a1a2e" },
+  mesBadge:         { backgroundColor: "#fff", borderRadius: "8px", padding: "0.5rem 0.75rem", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", alignItems: "center", minWidth: "70px" },
+  mesNombre:        { fontSize: "0.75rem", color: "#999", fontWeight: "bold" },
+  mesValor:         { fontSize: "0.9rem", color: "#e94560", fontWeight: "bold" },
+  mesPedidos:       { fontSize: "0.75rem", color: "#666" },
 };
 
 export default PanelVendedor;

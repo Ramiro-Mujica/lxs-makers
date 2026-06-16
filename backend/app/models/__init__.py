@@ -4,3 +4,4 @@ from app.models.usuario import Usuario, Base
 from app.models.producto import Producto, ImagenProducto, Variante
 from app.models.pedido import Pedido, HistorialVenta
 from app.models.tablero import Tablero, Tarea
+from app.models.estadistica import EstadisticaMensual

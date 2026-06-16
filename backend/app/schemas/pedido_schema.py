@@ -6,10 +6,8 @@ from datetime import datetime
 
 
 class EstadoPedido(str, Enum):
-    PENDIENTE  = "pendiente"
-    EN_PROCESO = "en_proceso"
-    ENVIADO    = "enviado"
-    ENTREGADO  = "entregado"
+    ARMANDO_PEDIDO = "armando_pedido"
+    ENVIADO        = "enviado"
 
 
 class PedidoCreate(BaseModel):
