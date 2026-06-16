@@ -4,6 +4,7 @@ import uuid
 from sqlalchemy import Column, String, Enum, TIMESTAMP
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
+from sqlalchemy import Column, String, Enum, TIMESTAMP, Integer
 
 Base = declarative_base()
 
@@ -25,6 +26,7 @@ class Usuario(Base):
     nombre_negocio  = Column(String(255), nullable=True)
     codigo_catalogo = Column(String(50), nullable=True, unique=True)
     whatsapp        = Column(String(20), nullable=True)
+    limite_tableros = Column(Integer, nullable=False, default=5)
     created_at      = Column(TIMESTAMP, default=datetime.utcnow)
 
     def login(self) -> None:
