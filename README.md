@@ -1,48 +1,23 @@
 # LXS Makers
 
-Sistema de Gestión Comercial para Emprendedores  
-Parcial 2 — Diseño de Sistemas
+Sistema de Gestión Comercial para Emprendedores — Parcial 2
 
-## Stack Tecnológico
+## Stack
 
-- **Frontend:** React.js + React Router
+- **Frontend:** React.js + React Router + Recharts
 - **Backend:** FastAPI (Python)
-- **Base de datos:** MySQL (phpMyAdmin)
-- **Imágenes:** Cloudinary (conversión automática a WebP)
-- **Autenticación:** JWT
-
-## Estructura del Proyecto 
-
-```
-lxs-makers/
-├── backend/
-│   ├── app/
-│   │   ├── config/       # Singleton DB + Settings
-│   │   ├── models/       # Clases del diagrama (SQLAlchemy)
-│   │   ├── controllers/  # Rutas FastAPI (MVC)
-│   │   ├── schemas/      # Validaciones Pydantic
-│   │   ├── services/     # Lógica de negocio
-│   │   ├── utils/        # Helpers
-│   │   └── middleware/   # Auth middleware
-│   ├── .env.example
-│   ├── main.py
-│   └── requirements.txt
-├── frontend/
-│   └── src/
-│       ├── components/   # Navbar y componentes reutilizables
-│       ├── pages/        # Vistas
-│       └── context/      # Estado global
-└── database/
-    └── lxs_makers.sql
-```
+- **Base de datos:** MySQL (phpMyAdmin / Workbench)
+- **Imágenes:** Cloudinary (WebP automático)
+- **Auth:** JWT + bcrypt
 
 ## Instalación Backend
 
 ```bash
 cd backend
+python -m venv venv
+venv\Scripts\activate        # Windows
 pip install -r requirements.txt
-cp .env.example .env
-# Completar .env con credenciales reales
+cp .env.example .env         # Completar con tus credenciales
 uvicorn main:app --reload
 ```
 
@@ -51,9 +26,33 @@ uvicorn main:app --reload
 ```bash
 cd frontend
 npm install
+npm install recharts
 npm run dev
 ```
 
 ## Base de Datos
 
-Importar el archivo `database/lxs_makers.sql` en phpMyAdmin.
+Importar `database/lxs_makers.sql` en phpMyAdmin o Workbench.
+
+## Estructura
+
+```
+lxs-makers/
+├── backend/
+│   ├── app/
+│   │   ├── config/         # Singleton DB + Settings
+│   │   ├── models/         # SQLAlchemy (Usuario, Vendedor, Administrador, Producto, Pedido, Tablero)
+│   │   ├── controllers/    # FastAPI routers (MVC)
+│   │   ├── schemas/        # Pydantic
+│   │   ├── services/       # Cloudinary, Cron
+│   │   └── utils/          # JWT, bcrypt, generador de códigos
+│   ├── .env.example
+│   ├── main.py
+│   └── requirements.txt
+├── frontend/
+│   └── src/
+│       ├── components/     # Navbar
+│       └── pages/          # Inicio, Login, Registro, PanelAdmin, PanelVendedor, Catalogo, Seguimiento
+└── database/
+    └── lxs_makers.sql
+```

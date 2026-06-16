@@ -26,7 +26,6 @@ class Pedido(Base):
     comentario          = Column(Text,           nullable=True)
     created_at          = Column(TIMESTAMP,      default=datetime.utcnow)
 
-    # Relación con Usuario (back_populates debe coincidir con usuario.py)
     vendedor = relationship("Usuario", back_populates="pedidos", foreign_keys=[usuario_id])
 
     def generar_codigo_unico(self) -> str:

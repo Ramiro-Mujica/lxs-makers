@@ -11,11 +11,7 @@ SECCION_ENUM = Enum("por_hacer", "en_progreso", "hecho", name="seccion_tarea")
 
 
 class Tablero(Base):
-    """
-    Agregación con Usuario (Vendedor).
-    Composición con Tarea.
-    El límite por vendedor se controla en usuarios.limite_tableros.
-    """
+    """Agregación con Usuario. Composición con Tarea."""
     __tablename__ = "tableros"
 
     id         = Column(String(36),  primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -23,7 +19,6 @@ class Tablero(Base):
     nombre     = Column(String(255), nullable=False)
     created_at = Column(TIMESTAMP,   default=datetime.utcnow)
 
-    # Relación con Usuario (back_populates debe coincidir con usuario.py)
     vendedor = relationship("Usuario", back_populates="tableros", foreign_keys=[usuario_id])
     tareas   = relationship("Tarea",   back_populates="tablero",  cascade="all, delete-orphan")
 

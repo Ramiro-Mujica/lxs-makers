@@ -1,13 +1,12 @@
 # app/models/asistente.py
-# Agregación con Vendedor: el asistente es una herramienta del panel
-# El historial de la calculadora expira cada 24 horas
+# Agregación con Vendedor: herramienta del panel, no persiste en BD
 
 
 class Asistente:
     """
     Agregación con Vendedor.
     Calculadora con historial de 24 horas.
-    No persiste en base de datos, vive en memoria/sesión del frontend.
+    Vive en memoria/sesión del frontend.
     """
     saludo_personalizado: str = ""
 

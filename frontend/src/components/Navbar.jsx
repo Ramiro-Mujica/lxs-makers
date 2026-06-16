@@ -15,29 +15,10 @@ function Navbar() {
 }
 
 const styles = {
-  nav: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "1rem 2rem",
-    backgroundColor: "#1a1a2e",
-    color: "#fff",
-  },
-  logo: {
-    fontSize: "1.5rem",
-    fontWeight: "bold",
-    color: "#e94560",
-    textDecoration: "none",
-  },
-  links: {
-    display: "flex",
-    gap: "1.5rem",
-  },
-  link: {
-    color: "#fff",
-    textDecoration: "none",
-    fontSize: "1rem",
-  },
+  nav:   { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 2rem", backgroundColor: "#1a1a2e", color: "#fff" },
+  logo:  { fontSize: "1.5rem", fontWeight: "bold", color: "#e94560", textDecoration: "none" },
+  links: { display: "flex", gap: "1.5rem" },
+  link:  { color: "#fff", textDecoration: "none", fontSize: "1rem" },
 };
 
 export default Navbar;

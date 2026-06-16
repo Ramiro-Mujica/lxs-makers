@@ -3,10 +3,20 @@ import logging
 import app.models
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from apscheduler.schedulers.background import BackgroundScheduler
 from app.config.settings import settings
-from app.controllers import auth_controller, admin_controller, producto_controller, pedido_controller
+from app.controllers import (
+    auth_controller,
+    admin_controller,
+    producto_controller,
+    pedido_controller,
+    tablero_controller,
+    estadistica_controller,
+    catalogo_controller,
+    imagen_controller,
+)
+from app.services.cron_service import purgar_pedidos_vencidos
 
-# Configuración de logs
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -23,7 +33,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS — permite que React se comunique con la API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -32,11 +41,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Registrar controllers (MVC)
 app.include_router(auth_controller.router)
 app.include_router(admin_controller.router)
 app.include_router(producto_controller.router)
 app.include_router(pedido_controller.router)
+app.include_router(tablero_controller.router)
+app.include_router(estadistica_controller.router)
+app.include_router(catalogo_controller.router)
+app.include_router(imagen_controller.router)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(purgar_pedidos_vencidos, "interval", hours=24)
+scheduler.start()
 
 
 @app.get("/")
@@ -52,4 +68,5 @@ def startup():
 
 @app.on_event("shutdown")
 def shutdown():
+    scheduler.shutdown()
     logger.info(f"{settings.APP_NAME} apagado.")

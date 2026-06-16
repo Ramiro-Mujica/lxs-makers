@@ -24,11 +24,11 @@ class ProductoCreate(BaseModel):
 
 
 class ProductoUpdate(BaseModel):
-    nombre:       Optional[str]           = None
-    precio:       Optional[float]         = None
-    descripcion:  Optional[str]           = None
+    nombre:       Optional[str]            = None
+    precio:       Optional[float]          = None
+    descripcion:  Optional[str]            = None
     estado:       Optional[EstadoProducto] = None
-    orden_visual: Optional[int]           = None
+    orden_visual: Optional[int]            = None
 
 
 class ImagenResponse(BaseModel):
@@ -53,12 +53,12 @@ class ProductoResponse(BaseModel):
     id:           str
     nombre:       str
     precio:       float
-    descripcion:  Optional[str]            = None
-    estado:       Optional[str]            = None
-    orden_visual: Optional[int]            = None
-    imagenes:     Optional[List[ImagenResponse]]  = []
+    descripcion:  Optional[str]                  = None
+    estado:       Optional[str]                  = None
+    orden_visual: Optional[int]                  = None
+    imagenes:     Optional[List[ImagenResponse]] = []
     variantes:    Optional[List[VarianteResponse]] = []
-    created_at:   Optional[datetime]       = None
+    created_at:   Optional[datetime]             = None
 
     class Config:
         from_attributes = True

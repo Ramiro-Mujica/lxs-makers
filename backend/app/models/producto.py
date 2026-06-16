@@ -1,6 +1,5 @@
 # app/models/producto.py
 # Composición con Usuario: no existe sin un usuario (vendedor)
-# Composición con ImagenProducto y Variante
 import uuid
 from sqlalchemy import Column, String, Text, Numeric, Integer, Enum, TIMESTAMP, ForeignKey
 from sqlalchemy.orm import relationship
@@ -11,10 +10,7 @@ ESTADO_PRODUCTO_ENUM = Enum("visible", "sin_stock", "oculto", name="estado_produ
 
 
 class Producto(Base):
-    """
-    Composición con Usuario (Vendedor).
-    Composición con ImagenProducto y Variante.
-    """
+    """Composición con Usuario. Composición con ImagenProducto y Variante."""
     __tablename__ = "productos"
 
     id           = Column(String(36),     primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -26,10 +22,9 @@ class Producto(Base):
     orden_visual = Column(Integer,        nullable=False, default=0)
     created_at   = Column(TIMESTAMP,      default=datetime.utcnow)
 
-    # Relaciones
-    vendedor  = relationship("Usuario",       back_populates="productos", foreign_keys=[usuario_id])
+    vendedor  = relationship("Usuario",        back_populates="productos", foreign_keys=[usuario_id])
     imagenes  = relationship("ImagenProducto", back_populates="producto",  cascade="all, delete-orphan")
-    variantes = relationship("Variante",       back_populates="producto",  cascade="all, delete-orphan")
+    variantes = relationship("Variante",        back_populates="producto",  cascade="all, delete-orphan")
 
     def crear_producto(self) -> None:
         pass
@@ -45,7 +40,7 @@ class Producto(Base):
 
 
 class ImagenProducto(Base):
-    """Composición con Producto: hasta 5 imágenes por producto (URLs de Cloudinary)."""
+    """Composición con Producto: hasta 5 imágenes (URLs de Cloudinary)."""
     __tablename__ = "imagenes_producto"
 
     id          = Column(String(36),  primary_key=True, default=lambda: str(uuid.uuid4()))

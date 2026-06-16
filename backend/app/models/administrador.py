@@ -1,18 +1,12 @@
 # app/models/administrador.py
 # Herencia: Administrador extiende Usuario
-from sqlalchemy.orm import relationship
 from app.models.usuario import Usuario
 
 
 class Administrador(Usuario):
-    """
-    Hereda de Usuario.
-    Gestiona vendedores, catálogos y límites del sistema.
-    """
-    __tablename__ = "usuarios"
-    __mapper_args__ = {
-        "polymorphic_identity": "administrador",
-    }
+    """Hereda de Usuario. Gestiona vendedores y el sistema."""
+    __tablename__   = "usuarios"
+    __mapper_args__ = {"polymorphic_identity": "administrador"}
 
     def habilitar_vendedor(self, vendedor_id: str) -> None:
         pass

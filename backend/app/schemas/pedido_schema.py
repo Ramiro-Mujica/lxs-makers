@@ -6,10 +6,10 @@ from datetime import datetime
 
 
 class EstadoPedido(str, Enum):
-    PENDIENTE   = "pendiente"
-    EN_PROCESO  = "en_proceso"
-    ENVIADO     = "enviado"
-    ENTREGADO   = "entregado"
+    PENDIENTE  = "pendiente"
+    EN_PROCESO = "en_proceso"
+    ENVIADO    = "enviado"
+    ENTREGADO  = "entregado"
 
 
 class PedidoCreate(BaseModel):
@@ -29,7 +29,7 @@ class PedidoResponse(BaseModel):
     datos_carrito:      Any
     total:              float
     estado_pedido:      str
-    comentario:         Optional[str] = None
+    comentario:         Optional[str]     = None
     usuario_id:         str
     created_at:         Optional[datetime] = None
 
