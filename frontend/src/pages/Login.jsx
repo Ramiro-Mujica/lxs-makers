@@ -39,37 +39,28 @@ function Login() {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.titulo}>Iniciar sesión</h2>
-        <p style={styles.subtitulo}>Accedé a tu panel de LXS Makers</p>
-        <input style={styles.input} type="email"    name="email"    placeholder="Email"      value={form.email}    onChange={handleChange} />
-        <input style={styles.input} type="password" name="password" placeholder="Contraseña" value={form.password} onChange={handleChange} />
-        {error && <p style={styles.error}>{error}</p>}
-        <button style={loading ? styles.btnOff : styles.btn} onClick={handleSubmit} disabled={loading}>
-          {loading ? "Ingresando..." : "Ingresar"}
-        </button>
-        <div style={styles.links}>
-          <Link to="/registro" style={styles.link}>¿No tenés cuenta? Registrate</Link>
-          <Link to="/"         style={styles.linkGris}>← Volver al inicio</Link>
+    <div className="auth-page page-shell">
+      <div className="center-page">
+        <div className="card auth-card" style={{ width: "100%", maxWidth: "440px" }}>
+          <div className="text-center">
+            <h2 className="section-title" style={{ fontSize: "1.75rem" }}>Iniciar sesión</h2>
+            <p className="section-subtitle">Accedé a tu panel de LXS Makers</p>
+          </div>
+          <input className="input" type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} />
+          <input className="input" type="password" name="password" placeholder="Contraseña" value={form.password} onChange={handleChange} />
+          {error && <p className="msg-error">{error}</p>}
+          <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
+            {loading ? "Ingresando..." : "Ingresar"}
+          </button>
+          <div className="text-center">
+            <Link to="/registro" className="link-accent">¿No tenés cuenta? Registrate</Link>
+            <div style={{ height: "0.35rem" }} />
+            <Link to="/" className="link-muted">← Volver al inicio</Link>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: { display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh", padding: "1rem" },
-  card:      { backgroundColor: "#f9f9f9", borderRadius: "12px", padding: "2.5rem", width: "100%", maxWidth: "420px", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", gap: "1rem" },
-  titulo:    { fontSize: "1.8rem", color: "#1a1a2e", margin: 0, textAlign: "center" },
-  subtitulo: { color: "#666", textAlign: "center", margin: 0, fontSize: "0.95rem" },
-  input:     { padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid #ddd", fontSize: "1rem", boxSizing: "border-box" },
-  btn:       { backgroundColor: "#e94560", color: "#fff", border: "none", borderRadius: "8px", padding: "0.75rem", fontSize: "1rem", cursor: "pointer" },
-  btnOff:    { backgroundColor: "#ccc", color: "#fff", border: "none", borderRadius: "8px", padding: "0.75rem", fontSize: "1rem", cursor: "not-allowed" },
-  error:     { color: "#e94560", fontSize: "0.9rem", textAlign: "center", margin: 0 },
-  links:     { display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" },
-  link:      { color: "#e94560", textDecoration: "none", fontSize: "0.9rem" },
-  linkGris:  { color: "#666",    textDecoration: "none", fontSize: "0.9rem" },
-};
 
 export default Login;

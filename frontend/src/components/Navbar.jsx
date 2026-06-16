@@ -1,24 +1,33 @@
-// frontend/src/components/Navbar.jsx
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function Navbar() {
+  const location = useLocation();
+
   return (
-    <nav style={styles.nav}>
-      <Link to="/" style={styles.logo}>LXS Makers</Link>
-      <div style={styles.links}>
-        <Link to="/"         style={styles.link}>Inicio</Link>
-        <Link to="/registro" style={styles.link}>Registro</Link>
-        <Link to="/login"    style={styles.link}>Ingresar</Link>
+    <nav className="navbar">
+      <div className="navbar__inner">
+        <Link to="/" className="navbar__logo">LXS Makers</Link>
+        <div className="navbar__links">
+          {[
+            { to: "/", label: "Inicio" },
+            { to: "/registro", label: "Registro" },
+            { to: "/login", label: "Ingresar" },
+          ].map((item) => {
+            const isActive = item.to === "/" ? location.pathname === "/" : location.pathname.startsWith(item.to);
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`navbar__link ${isActive ? "is-active" : ""}`.trim()}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );
 }
-
-const styles = {
-  nav:   { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 2rem", backgroundColor: "#1a1a2e", color: "#fff" },
-  logo:  { fontSize: "1.5rem", fontWeight: "bold", color: "#e94560", textDecoration: "none" },
-  links: { display: "flex", gap: "1.5rem" },
-  link:  { color: "#fff", textDecoration: "none", fontSize: "1rem" },
-};
 
 export default Navbar;

@@ -32,52 +32,44 @@ function Registro() {
   };
 
   if (exitoso) return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.icono}>✓</div>
-        <h2 style={styles.titulo}>¡Registro exitoso!</h2>
-        <p style={styles.subtitulo}>Tu cuenta está <strong>pendiente de aprobación</strong>. El administrador revisará tu solicitud.</p>
-        <Link to="/" style={styles.btn}>← Volver al inicio</Link>
+    <div className="auth-page page-shell">
+      <div className="center-page">
+        <div className="card auth-card" style={{ width: "100%", maxWidth: "440px", textAlign: "center" }}>
+          <div className="stat-number" style={{ lineHeight: 1 }}>✓</div>
+          <h2 className="section-title" style={{ fontSize: "1.75rem" }}>¡Registro exitoso!</h2>
+          <p className="section-subtitle">Tu cuenta está <strong>pendiente de aprobación</strong>. El administrador revisará tu solicitud.</p>
+          <Link to="/" className="btn-primary">← Volver al inicio</Link>
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.titulo}>Crear cuenta</h2>
-        <p style={styles.subtitulo}>Registrate como vendedor en LXS Makers</p>
-        <input style={styles.input} type="text"     name="nombre_negocio"    placeholder="Nombre de tu negocio"        value={form.nombre_negocio}    onChange={handleChange} />
-        <input style={styles.input} type="email"    name="email"             placeholder="Email"                        value={form.email}             onChange={handleChange} />
-        <input style={styles.input} type="text"     name="whatsapp"          placeholder="WhatsApp (ej: 5491112345678)" value={form.whatsapp}          onChange={handleChange} />
-        <input style={styles.input} type="password" name="password"          placeholder="Contraseña"                   value={form.password}          onChange={handleChange} />
-        <input style={styles.input} type="password" name="confirmar_password" placeholder="Confirmar contraseña"        value={form.confirmar_password} onChange={handleChange} />
-        {error && <p style={styles.error}>{error}</p>}
-        <button style={loading ? styles.btnOff : styles.btn} onClick={handleSubmit} disabled={loading}>
-          {loading ? "Registrando..." : "Crear cuenta"}
-        </button>
-        <div style={styles.links}>
-          <Link to="/login" style={styles.link}>¿Ya tenés cuenta? Iniciá sesión</Link>
-          <Link to="/"      style={styles.linkGris}>← Volver al inicio</Link>
+    <div className="auth-page page-shell">
+      <div className="center-page">
+        <div className="card auth-card" style={{ width: "100%", maxWidth: "440px" }}>
+          <div className="text-center">
+            <h2 className="section-title" style={{ fontSize: "1.75rem" }}>Crear cuenta</h2>
+            <p className="section-subtitle">Registrate como vendedor en LXS Makers</p>
+          </div>
+          <input className="input" type="text" name="nombre_negocio" placeholder="Nombre de tu negocio" value={form.nombre_negocio} onChange={handleChange} />
+          <input className="input" type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} />
+          <input className="input" type="text" name="whatsapp" placeholder="WhatsApp (ej: 5491112345678)" value={form.whatsapp} onChange={handleChange} />
+          <input className="input" type="password" name="password" placeholder="Contraseña" value={form.password} onChange={handleChange} />
+          <input className="input" type="password" name="confirmar_password" placeholder="Confirmar contraseña" value={form.confirmar_password} onChange={handleChange} />
+          {error && <p className="msg-error">{error}</p>}
+          <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
+            {loading ? "Registrando..." : "Crear cuenta"}
+          </button>
+          <div className="text-center">
+            <Link to="/login" className="link-accent">¿Ya tenés cuenta? Iniciá sesión</Link>
+            <div style={{ height: "0.35rem" }} />
+            <Link to="/" className="link-muted">← Volver al inicio</Link>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: { display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh", padding: "1rem" },
-  card:      { backgroundColor: "#f9f9f9", borderRadius: "12px", padding: "2.5rem", width: "100%", maxWidth: "420px", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", gap: "1rem" },
-  titulo:    { fontSize: "1.8rem", color: "#1a1a2e", margin: 0, textAlign: "center" },
-  subtitulo: { color: "#666", textAlign: "center", margin: 0, fontSize: "0.95rem" },
-  input:     { padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid #ddd", fontSize: "1rem", boxSizing: "border-box" },
-  btn:       { backgroundColor: "#e94560", color: "#fff", border: "none", borderRadius: "8px", padding: "0.75rem", fontSize: "1rem", cursor: "pointer", textAlign: "center", textDecoration: "none", boxSizing: "border-box" },
-  btnOff:    { backgroundColor: "#ccc", color: "#fff", border: "none", borderRadius: "8px", padding: "0.75rem", fontSize: "1rem", cursor: "not-allowed" },
-  error:     { color: "#e94560", fontSize: "0.9rem", textAlign: "center", margin: 0 },
-  icono:     { fontSize: "3rem", color: "#e94560", textAlign: "center" },
-  links:     { display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" },
-  link:      { color: "#e94560", textDecoration: "none", fontSize: "0.9rem" },
-  linkGris:  { color: "#666",    textDecoration: "none", fontSize: "0.9rem" },
-};
 
 export default Registro;
