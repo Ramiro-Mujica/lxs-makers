@@ -11,7 +11,7 @@ Parcial 2 — Diseño de Sistemas
 - **Imágenes:** Cloudinary (conversión automática a WebP)
 - **Autenticación:** JWT
 
-## Estructura del Proyecto
+## Estructura del Proyecto 
 
 ```
 lxs-makers/
