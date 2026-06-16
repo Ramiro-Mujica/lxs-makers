@@ -32,7 +32,8 @@ app.add_middleware(
 )
 
 # Registrar controllers (se importarán a medida que se desarrollen)
-# app.include_router(auth_controller.router)
+from app.controllers import auth_controller
+app.include_router(auth_controller.router)
 # app.include_router(producto_controller.router)
 # app.include_router(pedido_controller.router)
 # app.include_router(tablero_controller.router)
