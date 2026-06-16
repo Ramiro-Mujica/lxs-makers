@@ -1,9 +1,10 @@
 # main.py — Punto de entrada de LXS Makers (FastAPI + MVC)
 import logging
+import app.models
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from apscheduler.schedulers.background import BackgroundScheduler
 from app.config.settings import settings
+from app.controllers import auth_controller, admin_controller, producto_controller
 
 # Configuración de logs
 logging.basicConfig(
@@ -31,18 +32,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Registrar controllers (se importarán a medida que se desarrollen)
-from app.controllers import auth_controller
-app.include_router(auth_controller.router)
-from app.controllers import auth_controller, admin_controller
-
+# Registrar controllers (MVC)
 app.include_router(auth_controller.router)
 app.include_router(admin_controller.router)
-# app.include_router(producto_controller.router)
-# app.include_router(pedido_controller.router)
-# app.include_router(tablero_controller.router)
-# app.include_router(admin_controller.router)
-# app.include_router(catalogo_controller.router)
+app.include_router(producto_controller.router)
 
 
 @app.get("/")

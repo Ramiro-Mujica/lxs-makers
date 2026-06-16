@@ -2,9 +2,10 @@
 # Clase base del diagrama de clases (Herencia hacia Vendedor y Administrador)
 import uuid
 from sqlalchemy import Column, String, Enum, TIMESTAMP
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime
 from sqlalchemy import Column, String, Enum, TIMESTAMP, Integer
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
@@ -28,6 +29,9 @@ class Usuario(Base):
     whatsapp        = Column(String(20), nullable=True)
     limite_tableros = Column(Integer, nullable=False, default=5)
     created_at      = Column(TIMESTAMP, default=datetime.utcnow)
+    productos = relationship("Producto", back_populates="vendedor", cascade="all, delete-orphan")
+    pedidos   = relationship("Pedido",   back_populates="vendedor", cascade="all, delete-orphan")
+    tableros  = relationship("Tablero",  back_populates="vendedor")
 
     def login(self) -> None:
         pass

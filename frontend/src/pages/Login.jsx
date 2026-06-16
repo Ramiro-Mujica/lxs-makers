@@ -34,6 +34,7 @@ function Login() {
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("rol", data.rol);
       localStorage.setItem("estado", data.estado);
+      localStorage.setItem("userId", data.user_id);
 
       // Redirigir según rol y estado
       if (data.rol === "administrador") {
