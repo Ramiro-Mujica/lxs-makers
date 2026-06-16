@@ -2,20 +2,20 @@
 import { useState, useEffect, useRef } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-const API        = "http://127.0.0.1:8000";
-const COLORES    = ["#e94560", "#1a1a2e", "#f0a500", "#28a745", "#17a2b8"];
-const SECCIONES  = ["catalogo", "pedidos", "tableros", "estadisticas"];
+const API       = "http://127.0.0.1:8000";
+const COLORES   = ["#e94560", "#1a1a2e", "#f0a500", "#28a745", "#17a2b8"];
+const SECCIONES = ["perfil", "catalogo", "pedidos", "tableros", "estadisticas"];
 
 function PanelVendedor() {
   const vendedorId = localStorage.getItem("userId");
-  const [seccion,       setSeccion]       = useState("catalogo");
+  const [seccion,       setSeccion]       = useState("perfil");
   const [productos,     setProductos]     = useState([]);
   const [mensaje,       setMensaje]       = useState("");
   const [form, setForm] = useState({ nombre: "", precio: "", descripcion: "", variantes: [] });
   const [nuevaVariante, setNuevaVariante] = useState({ tipo: "", valor: "" });
 
   const cargarProductos = async () => {
-    const res  = await fetch(`${API}/productos/vendedor/${vendedorId}`);
+    const res = await fetch(`${API}/productos/vendedor/${vendedorId}`);
     setProductos(await res.json());
   };
 
@@ -73,6 +73,8 @@ function PanelVendedor() {
 
       {mensaje && <p style={styles.mensaje}>{mensaje}</p>}
 
+      {seccion === "perfil" && <SeccionPerfil vendedorId={vendedorId} />}
+
       {seccion === "catalogo" && (
         <div>
           <h2 style={styles.subtitulo}>Mis productos</h2>
@@ -108,7 +110,6 @@ function PanelVendedor() {
                       {p.variantes.map((v, i) => <span key={i} style={styles.varianteBadge}>{v.tipo}: {v.valor}</span>)}
                     </div>
                   )}
-                  {/* Gestor de imágenes */}
                   <GestorImagenes productoId={p.id} imagenes={p.imagenes} onActualizar={cargarProductos} />
                 </div>
                 <div style={styles.productoAcciones}>
@@ -132,10 +133,108 @@ function PanelVendedor() {
   );
 }
 
+// ─── Sección Perfil ───────────────────────────────────────────────────
+function SeccionPerfil({ vendedorId }) {
+  const [perfil,   setPerfil]   = useState(null);
+  const [form,     setForm]     = useState({ nombre_negocio: "", descripcion: "", whatsapp: "" });
+  const [mensaje,  setMensaje]  = useState("");
+  const [editando, setEditando] = useState(false);
+
+  useEffect(() => {
+    const cargar = async () => {
+      const res  = await fetch(`${API}/auth/perfil/${vendedorId}`);
+      const data = await res.json();
+      setPerfil(data);
+      setForm({
+        nombre_negocio: data.nombre_negocio || "",
+        descripcion:    data.descripcion    || "",
+        whatsapp:       data.whatsapp       || "",
+      });
+    };
+    cargar();
+  }, [vendedorId]);
+
+  const guardar = async () => {
+    const res  = await fetch(`${API}/auth/perfil/${vendedorId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    const data = await res.json();
+    setMensaje(data.mensaje || data.detail);
+    setEditando(false);
+    setPerfil({ ...perfil, ...form });
+  };
+
+  if (!perfil) return <p style={styles.vacio}>Cargando perfil...</p>;
+
+  return (
+    <div>
+      <h2 style={styles.subtitulo}>Mi perfil</h2>
+      {mensaje && <p style={styles.mensaje}>{mensaje}</p>}
+
+      <div style={styles.card}>
+        {!editando ? (
+          <>
+            <div style={styles.perfilRow}>
+              <span style={styles.perfilLabel}>Nombre del negocio</span>
+              <span style={styles.perfilValor}>{perfil.nombre_negocio || "Sin nombre"}</span>
+            </div>
+            <div style={styles.perfilRow}>
+              <span style={styles.perfilLabel}>Descripción</span>
+              <span style={styles.perfilValor}>{perfil.descripcion || "Sin descripción"}</span>
+            </div>
+            <div style={styles.perfilRow}>
+              <span style={styles.perfilLabel}>WhatsApp</span>
+              <span style={styles.perfilValor}>{perfil.whatsapp || "Sin número"}</span>
+            </div>
+            <div style={styles.perfilRow}>
+              <span style={styles.perfilLabel}>Código de catálogo</span>
+              <span style={{ ...styles.perfilValor, fontWeight: "bold", color: "#e94560" }}>
+                {perfil.codigo_catalogo}
+              </span>
+            </div>
+            <button style={styles.btnPrimario} onClick={() => setEditando(true)}>
+              Editar perfil
+            </button>
+          </>
+        ) : (
+          <>
+            <label style={styles.perfilLabel}>Nombre del negocio</label>
+            <input
+              style={styles.input}
+              value={form.nombre_negocio}
+              onChange={(e) => setForm({ ...form, nombre_negocio: e.target.value })}
+            />
+            <label style={styles.perfilLabel}>Descripción del negocio</label>
+            <textarea
+              style={styles.textarea}
+              placeholder="Contale a tus clientes de qué trata tu tienda..."
+              value={form.descripcion}
+              onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+            />
+            <label style={styles.perfilLabel}>WhatsApp (con código de país)</label>
+            <input
+              style={styles.input}
+              placeholder="ej: 5491112345678"
+              value={form.whatsapp}
+              onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+            />
+            <div style={styles.variantesRow}>
+              <button style={styles.btnPrimario}   onClick={guardar}>Guardar cambios</button>
+              <button style={styles.btnSecundario} onClick={() => setEditando(false)}>Cancelar</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Gestor de imágenes ───────────────────────────────────────────────
 function GestorImagenes({ productoId, imagenes, onActualizar }) {
-  const inputRef      = useRef();
-  const LIMITE        = 5;
+  const inputRef           = useRef();
+  const LIMITE             = 5;
   const [subiendo, setSubiendo] = useState(false);
 
   const subirImagen = async (e) => {
@@ -181,12 +280,32 @@ function GestorImagenes({ productoId, imagenes, onActualizar }) {
 function SeccionPedidos({ vendedorId }) {
   const [pedidos, setPedidos] = useState([]);
   const [mensaje, setMensaje] = useState("");
+  const [formNuevo, setFormNuevo] = useState({ detalle: "", total: "" });
+  const [creando, setCreando] = useState(false);
 
   const cargar = async () => {
-    const res  = await fetch(`${API}/pedidos/vendedor/${vendedorId}`);
+    const res = await fetch(`${API}/pedidos/vendedor/${vendedorId}`);
     setPedidos(await res.json());
   };
   useEffect(() => { cargar(); }, []);
+
+  const crearPedido = async () => {
+    if (!formNuevo.total) { setMensaje("El total es obligatorio."); return; }
+    const res  = await fetch(`${API}/pedidos/vendedor/${vendedorId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        datos_carrito: [{ detalle: formNuevo.detalle }],
+        total:         parseFloat(formNuevo.total),
+        usuario_id:    vendedorId,
+      }),
+    });
+    const data = await res.json();
+    setMensaje(`Pedido creado. Código: ${data.codigo_seguimiento}`);
+    setFormNuevo({ detalle: "", total: "" });
+    setCreando(false);
+    cargar();
+  };
 
   const cambiarEstado = async (id, estado) => {
     const comentario = estado === "enviado" ? prompt("Comentario (opcional):") || "" : "";
@@ -211,6 +330,34 @@ function SeccionPedidos({ vendedorId }) {
     <div>
       <h2 style={styles.subtitulo}>Mis pedidos</h2>
       {mensaje && <p style={styles.mensaje}>{mensaje}</p>}
+
+      {!creando ? (
+        <button style={{ ...styles.btnPrimario, marginBottom: "1rem" }} onClick={() => setCreando(true)}>
+          + Registrar pedido
+        </button>
+      ) : (
+        <div style={styles.card}>
+          <h3 style={styles.cardTitulo}>Nuevo pedido</h3>
+          <input
+            style={styles.input}
+            placeholder="Detalle del pedido (opcional)"
+            value={formNuevo.detalle}
+            onChange={(e) => setFormNuevo({ ...formNuevo, detalle: e.target.value })}
+          />
+          <input
+            style={styles.input}
+            placeholder="Total ($)"
+            type="number"
+            value={formNuevo.total}
+            onChange={(e) => setFormNuevo({ ...formNuevo, total: e.target.value })}
+          />
+          <div style={styles.variantesRow}>
+            <button style={styles.btnPrimario}   onClick={crearPedido}>Crear pedido</button>
+            <button style={styles.btnSecundario} onClick={() => setCreando(false)}>Cancelar</button>
+          </div>
+        </div>
+      )}
+
       {pedidos.length === 0 && <p style={styles.vacio}>No tenés pedidos activos.</p>}
       {pedidos.map((p) => {
         const c = colorEstado(p.estado_pedido);
@@ -323,21 +470,16 @@ function SeccionTableros({ vendedorId }) {
                   <div key={ta.id} style={styles.kanbanTarea}>
                     <span>{ta.contenido}</span>
                     <div style={styles.kanbanAcciones}>
-                      {col !== "por_hacer"  && <button style={styles.btnKanban} onClick={() => moverTarea(ta.id, COLUMNAS[COLUMNAS.indexOf(col) - 1])}>←</button>}
-                      {col !== "hecho"      && <button style={styles.btnKanban} onClick={() => moverTarea(ta.id, COLUMNAS[COLUMNAS.indexOf(col) + 1])}>→</button>}
+                      {col !== "por_hacer" && <button style={styles.btnKanban} onClick={() => moverTarea(ta.id, COLUMNAS[COLUMNAS.indexOf(col) - 1])}>←</button>}
+                      {col !== "hecho"     && <button style={styles.btnKanban} onClick={() => moverTarea(ta.id, COLUMNAS[COLUMNAS.indexOf(col) + 1])}>→</button>}
                       <button style={styles.btnKanbanElim} onClick={() => eliminarTarea(ta.id)}>✕</button>
                     </div>
                   </div>
                 ))}
-                <button
-                  style={styles.btnAgregarTarea}
-                  onClick={() => {
-                    const contenido = prompt("Nueva tarea:");
-                    if (contenido) crearTarea(t.id, contenido, col);
-                  }}
-                >
-                  + Tarea
-                </button>
+                <button style={styles.btnAgregarTarea} onClick={() => {
+                  const contenido = prompt("Nueva tarea:");
+                  if (contenido) crearTarea(t.id, contenido, col);
+                }}>+ Tarea</button>
               </div>
             ))}
           </div>
@@ -353,7 +495,7 @@ function SeccionEstadisticas({ vendedorId }) {
 
   useEffect(() => {
     const cargar = async () => {
-      const res  = await fetch(`${API}/estadisticas/vendedor/${vendedorId}`);
+      const res = await fetch(`${API}/estadisticas/vendedor/${vendedorId}`);
       setStats(await res.json());
     };
     cargar();
@@ -364,7 +506,6 @@ function SeccionEstadisticas({ vendedorId }) {
   return (
     <div>
       <h2 style={styles.subtitulo}>Mis estadísticas</h2>
-
       <div style={styles.statsRow}>
         <div style={styles.statCard}>
           <span style={styles.statNum}>${stats.total_ventas.toFixed(2)}</span>
@@ -376,9 +517,7 @@ function SeccionEstadisticas({ vendedorId }) {
         </div>
       </div>
 
-      {stats.productos.length === 0 && (
-        <p style={styles.vacio}>Aún no tenés ventas registradas.</p>
-      )}
+      {stats.productos.length === 0 && <p style={styles.vacio}>Aún no tenés ventas registradas.</p>}
 
       {stats.productos.length > 0 && (
         <>
@@ -389,9 +528,7 @@ function SeccionEstadisticas({ vendedorId }) {
               <YAxis />
               <Tooltip />
               <Bar dataKey="total_cantidad" name="Unidades vendidas">
-                {stats.productos.map((_, i) => (
-                  <Cell key={i} fill={COLORES[i % COLORES.length]} />
-                ))}
+                {stats.productos.map((_, i) => <Cell key={i} fill={COLORES[i % COLORES.length]} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -403,9 +540,7 @@ function SeccionEstadisticas({ vendedorId }) {
               <YAxis />
               <Tooltip formatter={(v) => `$${v.toFixed(2)}`} />
               <Bar dataKey="total_ganancia" name="Ganancia">
-                {stats.productos.map((_, i) => (
-                  <Cell key={i} fill={COLORES[i % COLORES.length]} />
-                ))}
+                {stats.productos.map((_, i) => <Cell key={i} fill={COLORES[i % COLORES.length]} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -471,6 +606,9 @@ const styles = {
   statCard:         { backgroundColor: "#f9f9f9", borderRadius: "12px", padding: "1.5rem 2rem", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", alignItems: "center", flex: 1 },
   statNum:          { fontSize: "2rem", fontWeight: "bold", color: "#e94560" },
   statLabel:        { color: "#666", fontSize: "0.9rem" },
+  perfilRow:        { display: "flex", flexDirection: "column", gap: "0.2rem", padding: "0.5rem 0", borderBottom: "1px solid #eee" },
+  perfilLabel:      { fontSize: "0.8rem", color: "#999", fontWeight: "bold", textTransform: "uppercase" },
+  perfilValor:      { fontSize: "1rem", color: "#1a1a2e" },
 };
 
 export default PanelVendedor;

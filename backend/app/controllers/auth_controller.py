@@ -8,9 +8,17 @@ from app.config.database import get_db
 from app.models.usuario import Usuario
 from app.schemas.usuario_schema import UsuarioCreate, LoginRequest, TokenResponse
 from app.utils.auth_utils import hashear_password, verificar_password, crear_token
+from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 logger = logging.getLogger(__name__)
+
+
+class PerfilUpdate(BaseModel):
+    nombre_negocio: Optional[str] = None
+    descripcion:    Optional[str] = None
+    whatsapp:       Optional[str] = None
 
 
 @router.post("/registro")
@@ -59,3 +67,39 @@ def login(datos: LoginRequest, db: Session = Depends(get_db)):
         "estado":       usuario.estado,
         "user_id":      usuario.id,
     }
+
+
+@router.get("/perfil/{usuario_id}")
+def obtener_perfil(usuario_id: str, db: Session = Depends(get_db)):
+    """Obtiene el perfil del vendedor."""
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    return {
+        "id":              usuario.id,
+        "email":           usuario.email,
+        "nombre_negocio":  usuario.nombre_negocio,
+        "descripcion":     usuario.descripcion,
+        "whatsapp":        usuario.whatsapp,
+        "codigo_catalogo": usuario.codigo_catalogo,
+    }
+
+
+@router.patch("/perfil/{usuario_id}")
+def actualizar_perfil(usuario_id: str, datos: PerfilUpdate, db: Session = Depends(get_db)):
+    """Actualiza el perfil del vendedor."""
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+
+    if datos.nombre_negocio is not None:
+        usuario.nombre_negocio = bleach.clean(datos.nombre_negocio.strip())
+    if datos.descripcion is not None:
+        usuario.descripcion = bleach.clean(datos.descripcion.strip())
+    if datos.whatsapp is not None:
+        usuario.whatsapp = bleach.clean(datos.whatsapp.strip())
+
+    db.commit()
+    db.refresh(usuario)
+    logger.info(f"Perfil actualizado: {usuario.email}")
+    return {"mensaje": "Perfil actualizado correctamente."}

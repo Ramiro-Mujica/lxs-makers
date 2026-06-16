@@ -1,6 +1,6 @@
 # app/models/usuario.py
 import uuid
-from sqlalchemy import Column, String, Enum, TIMESTAMP, Integer
+from sqlalchemy import Column, String, Enum, TIMESTAMP, Integer, Text
 from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime
 
@@ -20,6 +20,7 @@ class Usuario(Base):
     rol             = Column(ROL_ENUM,    nullable=False)
     estado          = Column(ESTADO_ENUM, nullable=False, default="pendiente")
     nombre_negocio  = Column(String(255), nullable=True)
+    descripcion     = Column(Text, nullable=True)
     codigo_catalogo = Column(String(50),  nullable=True, unique=True)
     whatsapp        = Column(String(20),  nullable=True)
     limite_tableros = Column(Integer,     nullable=False, default=5)
