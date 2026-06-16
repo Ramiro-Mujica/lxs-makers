@@ -59,8 +59,8 @@ function PanelVendedor() {
     cargarProductos();
   };
 
-  const cambiarEstado = async (id, estado) => {
-    const res  = await fetch(`${API}/productos/${id}`, {
+  const cambiarEstadoProducto = async (id, estado) => {
+    const res = await fetch(`${API}/productos/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ estado }),
@@ -94,7 +94,6 @@ function PanelVendedor() {
         <div>
           <h2 style={styles.subtitulo}>Mis productos</h2>
 
-          {/* Formulario nuevo producto */}
           <div style={styles.card}>
             <h3 style={styles.cardTitulo}>Agregar producto</h3>
             <input
@@ -116,8 +115,6 @@ function PanelVendedor() {
               value={form.descripcion}
               onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
             />
-
-            {/* Variantes */}
             <div style={styles.variantesRow}>
               <input
                 style={styles.inputSmall}
@@ -135,7 +132,6 @@ function PanelVendedor() {
                 + Variante
               </button>
             </div>
-
             {form.variantes.length > 0 && (
               <div style={styles.variantesList}>
                 {form.variantes.map((v, i) => (
@@ -145,13 +141,11 @@ function PanelVendedor() {
                 ))}
               </div>
             )}
-
             <button style={styles.btnPrimario} onClick={crearProducto}>
               Crear producto
             </button>
           </div>
 
-          {/* Lista de productos */}
           <div style={styles.listaProductos}>
             {productos.length === 0 && (
               <p style={styles.vacio}>No tenés productos aún.</p>
@@ -177,7 +171,7 @@ function PanelVendedor() {
                   <select
                     style={styles.select}
                     value={p.estado}
-                    onChange={(e) => cambiarEstado(p.id, e.target.value)}
+                    onChange={(e) => cambiarEstadoProducto(p.id, e.target.value)}
                   >
                     <option value="visible">Visible</option>
                     <option value="sin_stock">Sin stock</option>
@@ -196,9 +190,81 @@ function PanelVendedor() {
         </div>
       )}
 
-      {seccion === "pedidos"      && <p style={styles.proximamente}>Próximamente — Pedidos</p>}
+      {seccion === "pedidos"      && <SeccionPedidos vendedorId={vendedorId} />}
       {seccion === "tableros"     && <p style={styles.proximamente}>Próximamente — Tableros Kanban</p>}
       {seccion === "estadisticas" && <p style={styles.proximamente}>Próximamente — Estadísticas</p>}
+    </div>
+  );
+}
+
+function SeccionPedidos({ vendedorId }) {
+  const [pedidos, setPedidos] = useState([]);
+  const [mensaje, setMensaje] = useState("");
+
+  const cargarPedidos = async () => {
+    const res  = await fetch(`${API}/pedidos/vendedor/${vendedorId}`);
+    const data = await res.json();
+    setPedidos(data);
+  };
+
+  useEffect(() => { cargarPedidos(); }, []);
+
+  const cambiarEstado = async (id, estado, comentario = "") => {
+    const res = await fetch(`${API}/pedidos/${id}/estado`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado_pedido: estado, comentario }),
+    });
+    const data = await res.json();
+    setMensaje(data.mensaje || data.detail);
+    cargarPedidos();
+  };
+
+  const colorEstado = (estado) => ({
+    pendiente:  { bg: "#fff3cd", color: "#856404" },
+    en_proceso: { bg: "#cce5ff", color: "#004085" },
+    enviado:    { bg: "#d4edda", color: "#155724" },
+    entregado:  { bg: "#e2e3e5", color: "#383d41" },
+  }[estado] || { bg: "#f8f9fa", color: "#333" });
+
+  return (
+    <div>
+      <h2 style={styles.subtitulo}>Mis pedidos</h2>
+      {mensaje && <p style={styles.mensaje}>{mensaje}</p>}
+      {pedidos.length === 0 && <p style={styles.vacio}>No tenés pedidos activos.</p>}
+      {pedidos.map((p) => {
+        const c = colorEstado(p.estado_pedido);
+        return (
+          <div key={p.id} style={styles.productoCard}>
+            <div style={styles.productoInfo}>
+              <strong>Código: {p.codigo_seguimiento}</strong>
+              <span style={{ ...styles.estadoBadge, backgroundColor: c.bg, color: c.color }}>
+                {p.estado_pedido.replace("_", " ").toUpperCase()}
+              </span>
+              <span style={styles.precio}>Total: ${p.total}</span>
+              <span style={styles.desc}>Vence en {p.dias_restantes} día(s)</span>
+              {p.comentario && <span style={styles.desc}>Comentario: {p.comentario}</span>}
+            </div>
+            <div style={styles.productoAcciones}>
+              <select
+                style={styles.select}
+                value={p.estado_pedido}
+                onChange={(e) => {
+                  const comentario = e.target.value === "enviado"
+                    ? prompt("Agregá un comentario (opcional):") || ""
+                    : "";
+                  cambiarEstado(p.id, e.target.value, comentario);
+                }}
+              >
+                <option value="pendiente">Pendiente</option>
+                <option value="en_proceso">En proceso</option>
+                <option value="enviado">Enviado</option>
+                <option value="entregado">Entregado</option>
+              </select>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

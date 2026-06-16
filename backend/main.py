@@ -4,7 +4,7 @@ import app.models
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config.settings import settings
-from app.controllers import auth_controller, admin_controller, producto_controller
+from app.controllers import auth_controller, admin_controller, producto_controller, pedido_controller
 
 # Configuración de logs
 logging.basicConfig(
@@ -36,6 +36,7 @@ app.add_middleware(
 app.include_router(auth_controller.router)
 app.include_router(admin_controller.router)
 app.include_router(producto_controller.router)
+app.include_router(pedido_controller.router)
 
 
 @app.get("/")
