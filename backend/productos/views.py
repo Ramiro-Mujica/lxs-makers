@@ -66,12 +66,18 @@ def agregar_imagen(request, producto_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    url   = request.data.get('url')
-    orden = request.data.get('orden', 0)
-    if not url:
-        return Response({'error': 'La URL es obligatoria.'}, status=status.HTTP_400_BAD_REQUEST)
+    archivo = request.FILES.get('imagen')
+    if not archivo:
+        return Response({'error': 'No se recibió ninguna imagen.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    if archivo.size > 2 * 1024 * 1024:
+        return Response({'error': 'La imagen no puede superar 2MB.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    from services.imagen_service import convertir_y_subir
+    url = convertir_y_subir(archivo, str(request.user.id), str(producto_id))
+    orden = request.data.get('orden', producto.imagenes.count())
     imagen = ImagenProducto.objects.create(producto=producto, url=url, orden=orden)
+
     return Response({'id': str(imagen.id), 'url': imagen.url, 'orden': imagen.orden}, status=status.HTTP_201_CREATED)
 
 
@@ -84,6 +90,8 @@ def eliminar_imagen(request, producto_id, imagen_id):
     except (Producto.DoesNotExist, ImagenProducto.DoesNotExist):
         return Response({'error': 'No encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
+    from services.imagen_service import eliminar_imagen_storage
+    eliminar_imagen_storage(imagen.url)
     imagen.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 

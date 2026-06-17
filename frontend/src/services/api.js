@@ -42,15 +42,22 @@ export const usuariosService = {
 }
 
 export const productosService = {
-  listar:          ()          => api.get('/productos/'),
-  crear:           (datos)     => api.post('/productos/', datos),
-  actualizar:      (id, datos) => api.patch(`/productos/${id}/`, datos),
-  eliminar:        (id)        => api.delete(`/productos/${id}/`),
-  agregarImagen:   (id, datos) => api.post(`/productos/${id}/imagenes/`, datos),
-  eliminarImagen:  (id, imgId) => api.delete(`/productos/${id}/imagenes/${imgId}/`),
-  agregarVariante: (id, datos) => api.post(`/productos/${id}/variantes/`, datos),
-  eliminarVariante:(id, varId) => api.delete(`/productos/${id}/variantes/${varId}/`),
-  catalogoPublico: (codigo)    => api.get(`/productos/catalogo/${codigo}/`),
+  listar:          ()                => api.get('/productos/'),
+  crear:           (datos)           => api.post('/productos/', datos),
+  actualizar:      (id, datos)       => api.patch(`/productos/${id}/`, datos),
+  eliminar:        (id)              => api.delete(`/productos/${id}/`),
+  agregarImagen:   (id, archivo, orden) => {
+    const formData = new FormData()
+    formData.append('imagen', archivo)
+    formData.append('orden', orden)
+    return api.post(`/productos/${id}/imagenes/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+  eliminarImagen:  (id, imgId)       => api.delete(`/productos/${id}/imagenes/${imgId}/`),
+  agregarVariante: (id, datos)       => api.post(`/productos/${id}/variantes/`, datos),
+  eliminarVariante:(id, varId)       => api.delete(`/productos/${id}/variantes/${varId}/`),
+  catalogoPublico: (codigo)          => api.get(`/productos/catalogo/${codigo}/`),
 }
 
 export default api
