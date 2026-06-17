@@ -1,18 +1,8 @@
-import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import '../styles/dashboard.css'
 
 function Dashboard() {
-  const navigate = useNavigate()
-
-  const cerrarSesion = () => {
-    localStorage.removeItem('access')
-    localStorage.removeItem('refresh')
-    localStorage.removeItem('rol')
-    localStorage.removeItem('id')
-    navigate('/login')
-  }
-
-  const rol = localStorage.getItem('rol')
+  const { usuario, cerrarSesion } = useAuth()
 
   return (
     <div className="dashboard-wrapper">
@@ -21,7 +11,7 @@ function Dashboard() {
         <div className="sidebar-brand">LXS Makers</div>
         <nav className="sidebar-nav">
           <a href="/admin/dashboard" className="active">Dashboard</a>
-          {rol === 'administrador' && (
+          {usuario?.rol === 'administrador' && (
             <a href="/admin/vendedores">Vendedores</a>
           )}
         </nav>
@@ -31,7 +21,7 @@ function Dashboard() {
         <div className="topbar">
           <span className="topbar-title">Dashboard</span>
           <div className="topbar-user">
-            <span>{rol === 'administrador' ? 'Administrador' : 'Vendedor'}</span>
+            <span>{usuario?.rol === 'administrador' ? 'Administrador' : 'Vendedor'}</span>
             <button className="btn btn-danger" onClick={cerrarSesion}>
               Cerrar sesión
             </button>

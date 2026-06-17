@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import './index.css'
 
 import Inicio from './pages/Inicio'
@@ -8,15 +8,13 @@ import Dashboard from './pages/Dashboard'
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Inicio />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/registro" element={<Registro />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/vendedor/dashboard" element={<Dashboard />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Inicio />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/registro" element={<Registro />} />
+      <Route path="/admin/dashboard" element={<Dashboard />} />
+      <Route path="/vendedor/dashboard" element={<Dashboard />} />
+    </Routes>
   )
 }
 
