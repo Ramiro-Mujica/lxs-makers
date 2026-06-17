@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from .models import Producto, ImagenProducto, Variante
 from .serializers import ProductoSerializer, ProductoVendedorSerializer, VarianteSerializer
+from django.db import models
 
 logger = logging.getLogger(__name__)
 
@@ -141,3 +142,24 @@ def catalogo_publico(request, codigo_catalogo):
         'whatsapp':  vendedor.whatsapp,
         'productos': serializer.data,
     })
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def actualizar_orden_imagen(request, producto_id, imagen_id):
+    try:
+        producto = Producto.objects.get(id=producto_id, vendedor=request.user)
+        imagen   = ImagenProducto.objects.get(id=imagen_id, producto=producto)
+    except (Producto.DoesNotExist, ImagenProducto.DoesNotExist):
+        return Response({'error': 'No encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    nuevo_orden = request.data.get('orden')
+    if nuevo_orden is None:
+        return Response({'error': 'Orden requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if nuevo_orden == 0:
+        ImagenProducto.objects.filter(producto=producto).update(
+            orden=models.F('orden') + 1
+        )
+
+    imagen.orden = nuevo_orden
+    imagen.save()
+    return Response({'mensaje': 'Orden actualizado.'})
