@@ -62,14 +62,24 @@ export const productosService = {
 }
 
 export const pedidosService = {
-  listar:          ()              => api.get('/pedidos/'),
-  crear:           (datos)        => api.post('/pedidos/', datos),
-  actualizar:      (id, datos)    => api.patch(`/pedidos/${id}/`, datos),
-  eliminar:        (id)           => api.delete(`/pedidos/${id}/`),
-  agregarDetalle:  (id, datos)    => api.post(`/pedidos/${id}/detalles/`, datos),
-  eliminarDetalle: (id, detId)    => api.delete(`/pedidos/${id}/detalles/${detId}/`),
-  editarDetalle:   (id, detId, datos) => api.patch(`/pedidos/${id}/detalles/${detId}/editar/`, datos),
-  seguimiento:     (codigo)       => api.get(`/pedidos/seguimiento/${codigo}/`),
+  listar:          ()                  => api.get('/pedidos/'),
+  crear:           (datos)             => api.post('/pedidos/', datos),
+  actualizar:      (id, datos)         => api.patch(`/pedidos/${id}/`, datos),
+  eliminar:        (id)                => api.delete(`/pedidos/${id}/`),
+  agregarDetalle:  (id, datos)         => api.post(`/pedidos/${id}/detalles/`, datos),
+  eliminarDetalle: (id, detId)         => api.delete(`/pedidos/${id}/detalles/${detId}/`),
+  editarDetalle:   (id, detId, datos)  => api.patch(`/pedidos/${id}/detalles/${detId}/editar/`, datos),
+  seguimiento:     (codigo)            => api.get(`/pedidos/seguimiento/${codigo}/`),
+}
+
+export const tablerosService = {
+  listar:       ()              => api.get('/tableros/'),
+  crear:        (datos)         => api.post('/tableros/', datos),
+  actualizar:   (id, datos)     => api.patch(`/tableros/${id}/`, datos),
+  eliminar:     (id)            => api.delete(`/tableros/${id}/`),
+  agregarTarea: (id, datos)     => api.post(`/tableros/${id}/tareas/`, datos),
+  editarTarea:  (id, tId, datos)=> api.patch(`/tableros/${id}/tareas/${tId}/`, datos),
+  eliminarTarea:(id, tId)       => api.delete(`/tableros/${id}/tareas/${tId}/`),
 }
 
 export default api
