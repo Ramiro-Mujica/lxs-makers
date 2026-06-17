@@ -11,6 +11,7 @@ import Pedidos from './pages/vendedor/Pedidos'
 import Tableros from './pages/vendedor/Tableros'
 import Estadisticas from './pages/vendedor/Estadisticas'
 import Perfil from './pages/vendedor/Perfil'
+import Catalogo from './pages/Catalogo'
 import RutaProtegida from './components/RutaProtegida'
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
       <Route path="/" element={<Inicio />} />
       <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
+      <Route path="/catalogo/:codigo" element={<Catalogo />} />
       <Route path="/admin/dashboard" element={
         <RutaProtegida rolRequerido="administrador">
           <Dashboard />
