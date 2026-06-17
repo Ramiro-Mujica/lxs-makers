@@ -1,16 +1,23 @@
-# Python
-__pycache__/
-*.py[cod]
-.env
-app.log
-venv/
+# Entorno virtual
 .venv/
+
+# Variables de entorno - NUNCA subir
+.env
+*.env
+
+# Django
+__pycache__/
+*.pyc
+*.pyo
+db.sqlite3
+
+# VS Code
+.vscode/
 
 # Node
 node_modules/
 dist/
-.DS_Store
+build/
 
-# IDE
-.vscode/
-.idea/
+# Logs
+*.log
