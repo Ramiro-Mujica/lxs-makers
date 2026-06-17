@@ -68,6 +68,7 @@ export const pedidosService = {
   eliminar:        (id)           => api.delete(`/pedidos/${id}/`),
   agregarDetalle:  (id, datos)    => api.post(`/pedidos/${id}/detalles/`, datos),
   eliminarDetalle: (id, detId)    => api.delete(`/pedidos/${id}/detalles/${detId}/`),
+  editarDetalle:   (id, detId, datos) => api.patch(`/pedidos/${id}/detalles/${detId}/editar/`, datos),
   seguimiento:     (codigo)       => api.get(`/pedidos/seguimiento/${codigo}/`),
 }
 

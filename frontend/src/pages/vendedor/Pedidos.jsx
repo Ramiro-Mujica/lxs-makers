@@ -11,9 +11,12 @@ function Pedidos() {
   const [mostrarForm, setMostrarForm]   = useState(false)
   const [pedidoActivo, setPedidoActivo] = useState(null)
   const [form, setForm]                 = useState({ nombre_cliente: '', comentario: '' })
+  const [formEditar, setFormEditar]     = useState({ nombre_cliente: '', comentario: '' })
   const [productoSel, setProductoSel]   = useState('')
   const [cantidad, setCantidad]         = useState(1)
   const [variante, setVariante]         = useState('')
+  const [editandoInfo, setEditandoInfo] = useState(false)
+  const [guardando, setGuardando]       = useState(false)
 
   const cargarDatos = async () => {
     try {
@@ -33,6 +36,7 @@ function Pedidos() {
   useEffect(() => { cargarDatos() }, [])
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+  const handleChangeEditar = (e) => setFormEditar({ ...formEditar, [e.target.name]: e.target.value })
 
   const crearPedido = async (e) => {
     e.preventDefault()
@@ -42,22 +46,48 @@ function Pedidos() {
       setForm({ nombre_cliente: '', comentario: '' })
       setMostrarForm(false)
       await cargarDatos()
-      const nuevoPedido = res.data
-      setPedidoActivo(nuevoPedido)
+      setPedidoActivo(res.data)
+      setFormEditar({ nombre_cliente: res.data.nombre_cliente || '', comentario: res.data.comentario || '' })
     } catch {
       setError('Error al crear pedido.')
     }
   }
 
-  const cambiarEstado = async (id, estado) => {
+  const guardarInfoPedido = async () => {
+    setGuardando(true)
     try {
-      await pedidosService.actualizar(id, { estado })
-      await cargarDatos()
-      if (pedidoActivo?.id === id) {
-        const res = await pedidosService.listar()
-        const actualizado = res.data.find(p => p.id === id)
-        setPedidoActivo(actualizado)
-      }
+      const res = await pedidosService.actualizar(pedidoActivo.id, formEditar)
+      setPedidoActivo(res.data)
+      setEditandoInfo(false)
+      cargarDatos()
+    } catch {
+      setError('Error al guardar cambios.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  const abrirModal = (p) => {
+    setPedidoActivo(p)
+    setFormEditar({ nombre_cliente: p.nombre_cliente || '', comentario: p.comentario || '' })
+    setEditandoInfo(false)
+    setError('')
+    setProductoSel('')
+    setCantidad(1)
+    setVariante('')
+  }
+
+  const cerrarModal = () => {
+    setPedidoActivo(null)
+    setEditandoInfo(false)
+    setError('')
+  }
+
+  const cambiarEstado = async (estado) => {
+    try {
+      const res = await pedidosService.actualizar(pedidoActivo.id, { estado })
+      setPedidoActivo(res.data)
+      cargarDatos()
     } catch {
       setError('Error al cambiar estado.')
     }
@@ -67,7 +97,7 @@ function Pedidos() {
     if (!window.confirm('¿Eliminar este pedido?')) return
     try {
       await pedidosService.eliminar(id)
-      setPedidoActivo(null)
+      cerrarModal()
       cargarDatos()
     } catch {
       setError('Error al eliminar pedido.')
@@ -78,7 +108,7 @@ function Pedidos() {
     if (!productoSel) return
     setError('')
     try {
-      await pedidosService.agregarDetalle(pedidoActivo.id, {
+      const res = await pedidosService.agregarDetalle(pedidoActivo.id, {
         producto_id: productoSel,
         cantidad,
         variante,
@@ -86,12 +116,21 @@ function Pedidos() {
       setProductoSel('')
       setCantidad(1)
       setVariante('')
-      const res = await pedidosService.listar()
-      const actualizado = res.data.find(p => p.id === pedidoActivo.id)
-      setPedidoActivo(actualizado)
-      setPedidos(res.data)
+      setPedidoActivo(res.data)
+      cargarDatos()
     } catch {
       setError('Error al agregar producto.')
+    }
+  }
+
+  const editarCantidad = async (detId, nuevaCantidad) => {
+    if (nuevaCantidad < 1) return
+    try {
+      const res = await pedidosService.editarDetalle(pedidoActivo.id, detId, { cantidad: nuevaCantidad })
+      setPedidoActivo(res.data)
+      cargarDatos()
+    } catch {
+      setError('Error al editar cantidad.')
     }
   }
 
@@ -127,7 +166,7 @@ function Pedidos() {
         <div className="topbar">
           <span className="topbar-title">Pedidos</span>
           <div className="topbar-user">
-            <button className="btn btn-primary" onClick={() => { setMostrarForm(!mostrarForm); setPedidoActivo(null) }}>
+            <button className="btn btn-primary" onClick={() => { setMostrarForm(!mostrarForm); cerrarModal() }}>
               {mostrarForm ? 'Cancelar' : 'Nuevo pedido'}
             </button>
           </div>
@@ -140,11 +179,9 @@ function Pedidos() {
             <div className="card card-mb">
               <div className="card-header">Nuevo pedido</div>
               <form onSubmit={crearPedido}>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Nombre del cliente</label>
-                    <input type="text" name="nombre_cliente" value={form.nombre_cliente} onChange={handleChange} />
-                  </div>
+                <div className="form-group">
+                  <label>Nombre del cliente</label>
+                  <input type="text" name="nombre_cliente" value={form.nombre_cliente} onChange={handleChange} />
                 </div>
                 <div className="form-group">
                   <label>Comentario</label>
@@ -185,7 +222,7 @@ function Pedidos() {
                           <td>{p.dias_restantes} días</td>
                           <td>
                             <div className="acciones-group">
-                              <button className="btn btn-primary" onClick={() => setPedidoActivo(p)}>Ver</button>
+                              <button className="btn btn-primary" onClick={() => abrirModal(p)}>Ver</button>
                               <button className="btn btn-danger" onClick={() => eliminarPedido(p.id)}>Eliminar</button>
                             </div>
                           </td>
@@ -201,31 +238,60 @@ function Pedidos() {
       </div>
 
       {pedidoActivo && (
-        <div className="modal-overlay" onClick={() => setPedidoActivo(null)}>
+        <div className="modal-overlay" onClick={cerrarModal}>
           <div className="modal" onClick={e => e.stopPropagation()}>
 
             <div className="modal-header">
               <h2>Pedido #{pedidoActivo.codigo_seguimiento}</h2>
-              <button className="btn-cerrar" onClick={() => setPedidoActivo(null)}>✕</button>
+              <button className="btn-cerrar" onClick={cerrarModal}>✕</button>
             </div>
 
             {error && <div className="auth-error">{error}</div>}
 
             <div className="form-row">
               <div className="form-group">
-                <label>Cliente</label>
-                <input type="text" value={pedidoActivo.nombre_cliente || ''} readOnly />
-              </div>
-              <div className="form-group">
                 <label>Estado</label>
-                <select value={pedidoActivo.estado} onChange={e => cambiarEstado(pedidoActivo.id, e.target.value)}>
+                <select value={pedidoActivo.estado} onChange={e => cambiarEstado(e.target.value)}>
                   <option value="pendiente">Pendiente</option>
                   <option value="en_proceso">En proceso</option>
                   <option value="enviado">Enviado</option>
                   <option value="completado">Completado</option>
                 </select>
               </div>
+              <div className="form-group">
+                <label>Días restantes</label>
+                <input type="text" value={`${pedidoActivo.dias_restantes} días`} readOnly />
+              </div>
             </div>
+
+            {!editandoInfo ? (
+              <div className="card card-mb">
+                <div className="modal-seccion-titulo">Información del cliente</div>
+                <p><strong>Cliente:</strong> {pedidoActivo.nombre_cliente || '-'}</p>
+                <p><strong>Comentario:</strong> {pedidoActivo.comentario || '-'}</p>
+                <button className="btn btn-secondary" onClick={() => setEditandoInfo(true)}>
+                  Editar información
+                </button>
+              </div>
+            ) : (
+              <div className="card card-mb">
+                <div className="modal-seccion-titulo">Editar información</div>
+                <div className="form-group">
+                  <label>Nombre del cliente</label>
+                  <input type="text" name="nombre_cliente" value={formEditar.nombre_cliente} onChange={handleChangeEditar} />
+                </div>
+                <div className="form-group">
+                  <label>Comentario</label>
+                  <textarea name="comentario" value={formEditar.comentario} onChange={handleChangeEditar} />
+                </div>
+                <div className="acciones-group">
+                  <button className="btn btn-primary" onClick={guardarInfoPedido} disabled={guardando}>
+                    {guardando ? 'Guardando...' : 'Guardar'}
+                  </button>
+                  <button className="btn btn-secondary" onClick={() => setEditandoInfo(false)}>Cancelar</button>
+                </div>
+              </div>
+            )}
 
             <div className="modal-seccion">
               <div className="modal-seccion-titulo">Productos del pedido</div>
@@ -248,7 +314,13 @@ function Pedidos() {
                         <tr key={d.id}>
                           <td>{d.nombre_producto}</td>
                           <td>{d.variante || '-'}</td>
-                          <td>{d.cantidad}</td>
+                          <td>
+                            <div className="acciones-group">
+                              <button className="btn btn-secondary" onClick={() => editarCantidad(d.id, d.cantidad - 1)}>-</button>
+                              <span>{d.cantidad}</span>
+                              <button className="btn btn-secondary" onClick={() => editarCantidad(d.id, d.cantidad + 1)}>+</button>
+                            </div>
+                          </td>
                           <td>${Number(d.precio_venta * d.cantidad).toLocaleString('es-AR')}</td>
                           <td>
                             <button className="btn btn-danger" onClick={() => eliminarDetalle(d.id)}>✕</button>
@@ -294,6 +366,12 @@ function Pedidos() {
               )}
               <button className="btn btn-success" onClick={agregarProducto} disabled={!productoSel}>
                 Agregar al pedido
+              </button>
+            </div>
+
+            <div className="modal-seccion">
+              <button className="btn btn-danger" onClick={() => eliminarPedido(pedidoActivo.id)}>
+                Eliminar pedido
               </button>
             </div>
 

@@ -76,20 +76,30 @@ def agregar_detalle(request, pedido_id):
     except Producto.DoesNotExist:
         return Response({'error': 'Producto no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
-    detalle = DetallePedido.objects.create(
-        pedido         = pedido,
-        producto       = producto,
-        nombre_producto= producto.nombre,
-        precio_venta   = producto.precio_venta,
-        precio_costo   = producto.precio_costo,
-        cantidad       = cantidad,
-        variante       = variante,
-    )
+    detalle_existente = DetallePedido.objects.filter(
+        pedido=pedido,
+        producto=producto,
+        variante=variante
+    ).first()
+
+    if detalle_existente:
+        detalle_existente.cantidad += cantidad
+        detalle_existente.save()
+    else:
+        DetallePedido.objects.create(
+            pedido          = pedido,
+            producto        = producto,
+            nombre_producto = producto.nombre,
+            precio_venta    = producto.precio_venta,
+            precio_costo    = producto.precio_costo,
+            cantidad        = cantidad,
+            variante        = variante,
+        )
 
     pedido.total = sum(d.subtotal() for d in pedido.detalles.all())
     pedido.save()
 
-    return Response({'id': str(detalle.id), 'mensaje': 'Producto agregado al pedido.'}, status=status.HTTP_201_CREATED)
+    return Response(PedidoSerializer(pedido).data, status=status.HTTP_200_OK)
 
 
 @api_view(['DELETE'])
@@ -119,3 +129,25 @@ def seguimiento_publico(request, codigo):
         return Response({'error': 'Pedido no encontrado o vencido.'}, status=status.HTTP_404_NOT_FOUND)
 
     return Response(SeguimientoSerializer(pedido).data)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def editar_detalle(request, pedido_id, detalle_id):
+    try:
+        pedido  = Pedido.objects.get(id=pedido_id, vendedor=request.user)
+        detalle = DetallePedido.objects.get(id=detalle_id, pedido=pedido)
+    except (Pedido.DoesNotExist, DetallePedido.DoesNotExist):
+        return Response({'error': 'No encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    cantidad = request.data.get('cantidad')
+    if cantidad is not None:
+        cantidad = int(cantidad)
+        if cantidad < 1:
+            return Response({'error': 'La cantidad debe ser al menos 1.'}, status=status.HTTP_400_BAD_REQUEST)
+        detalle.cantidad = cantidad
+        detalle.save()
+
+    pedido.total = sum(d.subtotal() for d in pedido.detalles.all())
+    pedido.save()
+
+    return Response(PedidoSerializer(pedido).data)
