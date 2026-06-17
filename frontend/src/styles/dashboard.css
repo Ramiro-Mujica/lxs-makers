@@ -470,3 +470,11 @@ tbody tr:hover {
   color: var(--text-muted);
   font-size: var(--font-size-sm);
 }
+.pedido-total {
+  text-align: right;
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+  padding: var(--spacing-md) 0 0;
+  border-top: 2px solid var(--border-color);
+  margin-top: var(--spacing-sm);
+}

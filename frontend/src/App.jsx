@@ -7,6 +7,7 @@ import Registro from './pages/Registro'
 import Dashboard from './pages/Dashboard'
 import Vendedores from './pages/admin/Vendedores'
 import Productos from './pages/vendedor/Productos'
+import Pedidos from './pages/vendedor/Pedidos'
 import RutaProtegida from './components/RutaProtegida'
 
 function App() {
@@ -33,6 +34,11 @@ function App() {
       <Route path="/vendedor/productos" element={
         <RutaProtegida rolRequerido="vendedor">
           <Productos />
+        </RutaProtegida>
+      } />
+      <Route path="/vendedor/pedidos" element={
+        <RutaProtegida rolRequerido="vendedor">
+          <Pedidos />
         </RutaProtegida>
       } />
     </Routes>

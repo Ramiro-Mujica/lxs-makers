@@ -61,4 +61,14 @@ export const productosService = {
   catalogoPublico:      (codigo)             => api.get(`/productos/catalogo/${codigo}/`),
 }
 
+export const pedidosService = {
+  listar:          ()              => api.get('/pedidos/'),
+  crear:           (datos)        => api.post('/pedidos/', datos),
+  actualizar:      (id, datos)    => api.patch(`/pedidos/${id}/`, datos),
+  eliminar:        (id)           => api.delete(`/pedidos/${id}/`),
+  agregarDetalle:  (id, datos)    => api.post(`/pedidos/${id}/detalles/`, datos),
+  eliminarDetalle: (id, detId)    => api.delete(`/pedidos/${id}/detalles/${detId}/`),
+  seguimiento:     (codigo)       => api.get(`/pedidos/seguimiento/${codigo}/`),
+}
+
 export default api
