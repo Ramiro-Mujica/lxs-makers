@@ -102,6 +102,17 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'https://lxs-makers.vercel.app',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept', 'accept-encoding', 'authorization',
+    'content-type', 'dnt', 'origin', 'user-agent',
+    'x-csrftoken', 'x-requested-with',
+]
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 SIMPLE_JWT = {
