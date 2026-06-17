@@ -73,13 +73,20 @@ export const pedidosService = {
 }
 
 export const tablerosService = {
-  listar:       ()              => api.get('/tableros/'),
-  crear:        (datos)         => api.post('/tableros/', datos),
-  actualizar:   (id, datos)     => api.patch(`/tableros/${id}/`, datos),
-  eliminar:     (id)            => api.delete(`/tableros/${id}/`),
-  agregarTarea: (id, datos)     => api.post(`/tableros/${id}/tareas/`, datos),
-  editarTarea:  (id, tId, datos)=> api.patch(`/tableros/${id}/tareas/${tId}/`, datos),
-  eliminarTarea:(id, tId)       => api.delete(`/tableros/${id}/tareas/${tId}/`),
+  listar:       ()               => api.get('/tableros/'),
+  crear:        (datos)          => api.post('/tableros/', datos),
+  actualizar:   (id, datos)      => api.patch(`/tableros/${id}/`, datos),
+  eliminar:     (id)             => api.delete(`/tableros/${id}/`),
+  agregarTarea: (id, datos)      => api.post(`/tableros/${id}/tareas/`, datos),
+  editarTarea:  (id, tId, datos) => api.patch(`/tableros/${id}/tareas/${tId}/`, datos),
+  eliminarTarea:(id, tId)        => api.delete(`/tableros/${id}/tareas/${tId}/`),
+}
+
+export const estadisticasService = {
+  obtener:          ()         => api.get('/pedidos/estadisticas/'),
+  reiniciar:        ()         => api.post('/pedidos/estadisticas/reiniciar/'),
+  obtenerAdmin:     ()         => api.get('/pedidos/estadisticas/admin/'),
+  reiniciarAdmin:   (vendId)   => api.post('/pedidos/estadisticas/admin/reiniciar/', { vendedor_id: vendId }),
 }
 
 export default api

@@ -48,11 +48,18 @@ def pedido_detalle(request, pedido_id):
         return Response(PedidoSerializer(pedido).data)
 
     if request.method == 'PATCH':
+        estado_anterior = pedido.estado
         serializer = PedidoSerializer(pedido, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        return Response(serializer.data)
+        pedido_actualizado = serializer.save()
+
+        if estado_anterior != 'completado' and pedido_actualizado.estado == 'completado':
+            pedido_actualizado.completado_at = timezone.now()
+            pedido_actualizado.save()
+            logger.info(f"Pedido {pedido.codigo_seguimiento} completado")
+
+        return Response(PedidoSerializer(pedido_actualizado).data)
 
     pedido.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)

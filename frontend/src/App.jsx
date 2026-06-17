@@ -9,6 +9,7 @@ import Vendedores from './pages/admin/Vendedores'
 import Productos from './pages/vendedor/Productos'
 import Pedidos from './pages/vendedor/Pedidos'
 import Tableros from './pages/vendedor/Tableros'
+import Estadisticas from './pages/vendedor/Estadisticas'
 import RutaProtegida from './components/RutaProtegida'
 
 function App() {
@@ -45,6 +46,11 @@ function App() {
       <Route path="/vendedor/tableros" element={
         <RutaProtegida rolRequerido="vendedor">
           <Tableros />
+        </RutaProtegida>
+      } />
+      <Route path="/vendedor/estadisticas" element={
+        <RutaProtegida rolRequerido="vendedor">
+          <Estadisticas />
         </RutaProtegida>
       } />
     </Routes>
