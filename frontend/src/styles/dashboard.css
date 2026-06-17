@@ -229,3 +229,12 @@ tbody tr:hover {
 .badge-success { background: rgba(28,200,138,0.15); color: var(--color-success); }
 .badge-warning { background: rgba(246,194,62,0.15); color: var(--color-warning); }
 .badge-danger  { background: rgba(231,74,59,0.15);  color: var(--color-danger);  }
+.sidebar-footer {
+  padding: var(--spacing-md);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-footer .btn {
+  width: 100%;
+  justify-content: center;
+}

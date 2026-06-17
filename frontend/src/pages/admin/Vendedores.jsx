@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { usuariosService } from '../../services/api'
-import { useAuth } from '../../context/AuthContext'
+import SidebarAdmin from '../../components/SidebarAdmin'
 import '../../styles/dashboard.css'
 
 function Vendedores() {
-  const { cerrarSesion } = useAuth()
   const [vendedores, setVendedores] = useState([])
   const [cargando, setCargando]     = useState(true)
   const [error, setError]           = useState('')
@@ -46,22 +44,13 @@ function Vendedores() {
   return (
     <div className="dashboard-wrapper">
 
-      <aside className="sidebar">
-        <div className="sidebar-brand">LXS Makers</div>
-        <nav className="sidebar-nav">
-          <Link to="/admin/dashboard">Dashboard</Link>
-          <Link to="/admin/vendedores" className="active">Vendedores</Link>
-        </nav>
-      </aside>
+      <SidebarAdmin />
 
       <div className="main-content">
         <div className="topbar">
           <span className="topbar-title">Gestión de Vendedores</span>
           <div className="topbar-user">
             <span>Administrador</span>
-            <button className="btn btn-danger" onClick={cerrarSesion}>
-              Cerrar sesión
-            </button>
           </div>
         </div>
 
