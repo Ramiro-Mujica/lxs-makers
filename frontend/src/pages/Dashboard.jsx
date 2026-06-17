@@ -7,14 +7,23 @@ import SidebarVendedor from '../components/SidebarVendedor'
 import '../styles/dashboard.css'
 
 function Dashboard() {
-  const { usuario }             = useAuth()
-  const esAdmin                 = usuario?.rol === 'administrador'
-  const [resumen, setResumen]   = useState(null)
-  const [copiado, setCopiado]   = useState(false)
+  const { usuario }                   = useAuth()
+  const esAdmin                       = usuario?.rol === 'administrador'
+  const [resumen, setResumen]         = useState(null)
+  const [resumenAdmin, setResumenAdmin] = useState(null)
+  const [copiado, setCopiado]         = useState(false)
 
   useEffect(() => {
     if (!esAdmin) {
       usuariosService.resumen().then(res => setResumen(res.data)).catch(() => {})
+    } else {
+      usuariosService.listarVendedores().then(res => {
+        const vendedores = res.data
+        setResumenAdmin({
+          activos:    vendedores.filter(v => v.estado === 'activo').length,
+          pendientes: vendedores.filter(v => v.estado === 'pendiente').length,
+        })
+      }).catch(() => {})
     }
   }, [esAdmin])
 
@@ -45,13 +54,13 @@ function Dashboard() {
             <div className="stats-grid">
               <div className="stat-card">
                 <div className="stat-card-info">
-                  <h3>0</h3>
+                  <h3>{resumenAdmin?.activos || 0}</h3>
                   <p>Vendedores activos</p>
                 </div>
               </div>
               <div className="stat-card warning">
                 <div className="stat-card-info">
-                  <h3>0</h3>
+                  <h3>{resumenAdmin?.pendientes || 0}</h3>
                   <p>Pendientes de aprobación</p>
                 </div>
               </div>

@@ -53,7 +53,7 @@ function Inicio() {
       <nav className="inicio-nav">
         <span className="inicio-nav-brand">LXS Makers</span>
         <div className="inicio-nav-links">
-          <Link to="/login" className="link-nav-btn link-nav-outline">Iniciar sesión</Link>
+          <Link to="/login" className="link-nav-btn">Iniciar sesión</Link>
           <Link to="/registro" className="link-nav-btn">Registrarse</Link>
         </div>
       </nav>

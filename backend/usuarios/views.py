@@ -54,11 +54,11 @@ def login(request):
             status=status.HTTP_401_UNAUTHORIZED
         )
 
-    if usuario.estado == 'deshabilitado':
+    if usuario.estado == 'pendiente':
         return Response(
-            {'error': 'Tu cuenta está deshabilitada.'},
-            status=status.HTTP_403_FORBIDDEN
-        )
+        {'error': 'Tu cuenta está pendiente de aprobación por el administrador.'},
+        status=status.HTTP_403_FORBIDDEN
+    )
 
     tokens = get_tokens(usuario)
     logger.info(f"Login exitoso: {email}")
