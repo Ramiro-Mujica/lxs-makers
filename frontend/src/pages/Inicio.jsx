@@ -23,7 +23,7 @@ function Inicio() {
     setSeguimiento(null)
     setCargandoSeg(true)
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'}/pedidos/seguimiento/${codigoSeg.trim().toUpperCase()}/`)
+      const res = await fetch(`http://127.0.0.1:8000/api/pedidos/seguimiento/...`)
       const data = await res.json()
       if (!res.ok) {
         setErrorSeg(data.error || 'Pedido no encontrado.')
