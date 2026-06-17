@@ -37,6 +37,8 @@ export const usuariosService = {
   registro:              (datos)      => api.post('/usuarios/registro/', datos),
   login:                 (datos)      => api.post('/usuarios/login/',    datos),
   perfil:                ()           => api.get('/usuarios/perfil/'),
+  actualizarPerfil:      (datos)      => api.patch('/usuarios/perfil/', datos),
+  resumen:               ()           => api.get('/usuarios/resumen/'),
   listarVendedores:      ()           => api.get('/usuarios/vendedores/'),
   cambiarEstadoVendedor: (id, estado) => api.patch(`/usuarios/vendedores/${id}/estado/`, { estado }),
 }

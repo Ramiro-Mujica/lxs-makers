@@ -12,11 +12,12 @@ function SidebarVendedor() {
     <aside className="sidebar">
       <div className="sidebar-brand">LXS Makers</div>
       <nav className="sidebar-nav">
-        <Link to="/vendedor/dashboard" className={activo('/vendedor/dashboard')}>Dashboard</Link>
-        <Link to="/vendedor/productos" className={activo('/vendedor/productos')}>Productos</Link>
-        <Link to="/vendedor/pedidos" className={activo('/vendedor/pedidos')}>Pedidos</Link>
-        <Link to="/vendedor/tableros" className={activo('/vendedor/tableros')}>Tableros</Link>
-        <Link to="/vendedor/estadisticas" className={activo('/vendedor/estadisticas')}>Estadísticas</Link>
+        <Link to="/vendedor/dashboard"     className={activo('/vendedor/dashboard')}>Dashboard</Link>
+        <Link to="/vendedor/productos"     className={activo('/vendedor/productos')}>Productos</Link>
+        <Link to="/vendedor/pedidos"       className={activo('/vendedor/pedidos')}>Pedidos</Link>
+        <Link to="/vendedor/tableros"      className={activo('/vendedor/tableros')}>Tableros</Link>
+        <Link to="/vendedor/estadisticas"  className={activo('/vendedor/estadisticas')}>Estadísticas</Link>
+        <Link to="/vendedor/perfil"        className={activo('/vendedor/perfil')}>Mi perfil</Link>
       </nav>
       <div className="sidebar-footer">
         <button className="btn btn-danger" onClick={cerrarSesion}>Cerrar sesión</button>

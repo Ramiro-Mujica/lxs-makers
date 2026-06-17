@@ -1,10 +1,16 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { usuariosService } from '../services/api'
 import '../styles/auth.css'
 
+const validarPassword = (password) => {
+  if (password.length < 6) return 'La contraseña debe tener al menos 6 caracteres.'
+  if (!/[A-Z]/.test(password)) return 'La contraseña debe tener al menos una mayúscula.'
+  if (!/[a-z]/.test(password)) return 'La contraseña debe tener al menos una minúscula.'
+  if (!/[0-9]/.test(password)) return 'La contraseña debe tener al menos un número.'
+  return null
+}
+
 function Registro() {
-  const navigate = useNavigate()
   const [form, setForm]         = useState({ email: '', password: '', nombre_negocio: '', whatsapp: '' })
   const [error, setError]       = useState('')
   const [exito, setExito]       = useState('')
@@ -18,6 +24,13 @@ function Registro() {
     e.preventDefault()
     setError('')
     setExito('')
+
+    const errorPassword = validarPassword(form.password)
+    if (errorPassword) {
+      setError(errorPassword)
+      return
+    }
+
     setCargando(true)
     try {
       await usuariosService.registro(form)
@@ -26,6 +39,8 @@ function Registro() {
       const data = err.response?.data
       if (data?.email) {
         setError(data.email[0])
+      } else if (data?.password) {
+        setError(data.password[0])
       } else {
         setError('Error al registrarse. Intentá de nuevo.')
       }
@@ -88,11 +103,12 @@ function Registro() {
             <input
               type="password"
               name="password"
-              placeholder="••••••••"
+              placeholder="Mín. 6 caracteres, 1 mayúscula, 1 número"
               value={form.password}
               onChange={handleChange}
               required
             />
+            <small className="form-hint">Mínimo 6 caracteres, una mayúscula y un número.</small>
           </div>
 
           <button className="btn-auth" disabled={cargando}>

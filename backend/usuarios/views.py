@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .models import Usuario
+import bleach
 from .serializers import RegistroSerializer, LoginSerializer, UsuarioPerfilSerializer
 
 logger = logging.getLogger(__name__)
@@ -76,11 +77,20 @@ def perfil(request):
         serializer = UsuarioPerfilSerializer(request.user)
         return Response(serializer.data)
 
-    serializer = UsuarioPerfilSerializer(request.user, data=request.data, partial=True)
+    datos_permitidos = {}
+    if 'nombre_negocio' in request.data:
+        datos_permitidos['nombre_negocio'] = bleach.clean(str(request.data['nombre_negocio']).strip())
+    if 'whatsapp' in request.data:
+        datos_permitidos['whatsapp'] = bleach.clean(str(request.data['whatsapp']).strip())
+    if 'descripcion' in request.data:
+        datos_permitidos['descripcion'] = bleach.clean(str(request.data['descripcion']).strip())
+
+    serializer = UsuarioPerfilSerializer(request.user, data=datos_permitidos, partial=True)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     serializer.save()
+    logger.info(f"Perfil actualizado: {request.user.email}")
     return Response({'mensaje': 'Perfil actualizado correctamente.'})
 
 
@@ -122,3 +132,31 @@ def cambiar_estado_vendedor(request, usuario_id):
     vendedor.save()
     logger.info(f"Vendedor {vendedor.email} cambió a estado: {nuevo_estado}")
     return Response({'mensaje': f'Vendedor {nuevo_estado} correctamente.'})
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def resumen_vendedor(request):
+    from pedidos.models import Pedido
+    from productos.models import Producto
+    from django.utils import timezone
+    from datetime import timedelta
+
+    pedidos_activos = Pedido.objects.filter(
+        vendedor=request.user,
+        created_at__gte=timezone.now() - timedelta(days=7)
+    )
+
+    productos = Producto.objects.filter(vendedor=request.user)
+
+    return Response({
+        'nombre_negocio':    request.user.nombre_negocio or '-',
+        'codigo_catalogo':   request.user.codigo_catalogo or None,
+        'whatsapp':          request.user.whatsapp or '-',
+        'pedidos_pendientes':  pedidos_activos.filter(estado='pendiente').count(),
+        'pedidos_en_proceso':  pedidos_activos.filter(estado='en_proceso').count(),
+        'pedidos_enviados':    pedidos_activos.filter(estado='enviado').count(),
+        'pedidos_completados': pedidos_activos.filter(estado='completado').count(),
+        'total_productos':     productos.count(),
+        'productos_visibles':  productos.filter(estado='visible').count(),
+        'productos_sin_stock': productos.filter(estado='sin_stock').count(),
+        'productos_ocultos':   productos.filter(estado='oculto').count(),
+    })

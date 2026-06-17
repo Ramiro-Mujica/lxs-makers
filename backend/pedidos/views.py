@@ -135,7 +135,23 @@ def seguimiento_publico(request, codigo):
     if pedido.esta_vencido():
         return Response({'error': 'Pedido no encontrado o vencido.'}, status=status.HTTP_404_NOT_FOUND)
 
-    return Response(SeguimientoSerializer(pedido).data)
+    detalles = [
+        {
+            'nombre_producto': d.nombre_producto,
+            'variante':        d.variante or '-',
+            'cantidad':        d.cantidad,
+            'subtotal':        float(d.subtotal()),
+        }
+        for d in pedido.detalles.all()
+    ]
+
+    return Response({
+        'codigo_seguimiento': pedido.codigo_seguimiento,
+        'estado':             pedido.estado,
+        'total':              float(pedido.total),
+        'dias_restantes':     SeguimientoSerializer(pedido).data['dias_restantes'],
+        'detalles':           detalles,
+    })
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])

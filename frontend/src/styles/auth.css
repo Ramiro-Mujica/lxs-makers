@@ -128,3 +128,9 @@
   margin-bottom: var(--spacing-md);
   text-align: center;
 }
+.form-hint {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-top: var(--spacing-xs);
+}

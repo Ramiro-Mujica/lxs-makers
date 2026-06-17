@@ -478,3 +478,131 @@ tbody tr:hover {
   border-top: 2px solid var(--border-color);
   margin-top: var(--spacing-sm);
 }
+/* ===== PERFIL ===== */
+.perfil-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+
+.perfil-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.perfil-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.perfil-campo:last-child {
+  border-bottom: none;
+}
+
+.perfil-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.perfil-valor {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+.perfil-catalogo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.codigo-catalogo {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: 4px;
+  font-family: monospace;
+}
+
+.link-catalogo {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  word-break: break-all;
+}
+/* ===== DASHBOARD VENDEDOR ===== */
+.dashboard-catalogo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.dashboard-catalogo-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.dashboard-guia {
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  margin-top: var(--spacing-lg);
+}
+
+.guia-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.guia-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.guia-item:hover {
+  background: rgba(78,115,223,0.06);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  color: var(--text-primary);
+}
+
+.guia-icono {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.guia-item strong {
+  display: block;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.guia-item p {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
