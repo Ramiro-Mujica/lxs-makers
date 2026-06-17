@@ -12,10 +12,33 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const original = error.config
+    if (error.response?.status === 401 && !original._retry) {
+      original._retry = true
+      try {
+        const refresh = localStorage.getItem('refresh')
+        const res = await axios.post('http://127.0.0.1:8000/api/token/refresh/', { refresh })
+        localStorage.setItem('access', res.data.access)
+        original.headers.Authorization = `Bearer ${res.data.access}`
+        return api(original)
+      } catch {
+        localStorage.clear()
+        window.location.href = '/login'
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
 export const usuariosService = {
-  registro: (datos) => api.post('/usuarios/registro/', datos),
-  login:    (datos) => api.post('/usuarios/login/',    datos),
-  perfil:   ()      => api.get('/usuarios/perfil/'),
+  registro:              (datos)      => api.post('/usuarios/registro/', datos),
+  login:                 (datos)      => api.post('/usuarios/login/',    datos),
+  perfil:                ()           => api.get('/usuarios/perfil/'),
+  listarVendedores:      ()           => api.get('/usuarios/vendedores/'),
+  cambiarEstadoVendedor: (id, estado) => api.patch(`/usuarios/vendedores/${id}/estado/`, { estado }),
 }
 
 export default api

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import '../styles/dashboard.css'
 
@@ -10,9 +11,9 @@ function Dashboard() {
       <aside className="sidebar">
         <div className="sidebar-brand">LXS Makers</div>
         <nav className="sidebar-nav">
-          <a href="/admin/dashboard" className="active">Dashboard</a>
+          <Link to="/admin/dashboard" className="active">Dashboard</Link>
           {usuario?.rol === 'administrador' && (
-            <a href="/admin/vendedores">Vendedores</a>
+            <Link to="/admin/vendedores">Vendedores</Link>
           )}
         </nav>
       </aside>

@@ -82,3 +82,43 @@ def perfil(request):
 
     serializer.save()
     return Response({'mensaje': 'Perfil actualizado correctamente.'})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def listar_vendedores(request):
+    if request.user.rol != 'administrador':
+        return Response({'error': 'Sin permisos.'}, status=status.HTTP_403_FORBIDDEN)
+
+    vendedores = Usuario.objects.filter(rol='vendedor').order_by('-created_at')
+    serializer = UsuarioPerfilSerializer(vendedores, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def cambiar_estado_vendedor(request, usuario_id):
+    if request.user.rol != 'administrador':
+        return Response({'error': 'Sin permisos.'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        vendedor = Usuario.objects.get(id=usuario_id, rol='vendedor')
+    except Usuario.DoesNotExist:
+        return Response({'error': 'Vendedor no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    nuevo_estado = request.data.get('estado')
+    estados_validos = ['activo', 'deshabilitado', 'pendiente']
+    if nuevo_estado not in estados_validos:
+        return Response({'error': 'Estado inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if nuevo_estado == 'activo' and not vendedor.codigo_catalogo:
+        from utils.codigo_generator import generar_codigo_catalogo
+        codigo = generar_codigo_catalogo()
+        while Usuario.objects.filter(codigo_catalogo=codigo).exists():
+            codigo = generar_codigo_catalogo()
+        vendedor.codigo_catalogo = codigo
+
+    vendedor.estado = nuevo_estado
+    vendedor.save()
+    logger.info(f"Vendedor {vendedor.email} cambió a estado: {nuevo_estado}")
+    return Response({'mensaje': f'Vendedor {nuevo_estado} correctamente.'})

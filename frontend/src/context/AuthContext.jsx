@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const AuthContext = createContext()
-const INACTIVIDAD_MS = 30 * 60 * 1000
+const INACTIVIDAD_MS = 60 * 60 * 1000
 
 export function AuthProvider({ children }) {
   const navigate              = useNavigate()
@@ -24,6 +24,14 @@ export function AuthProvider({ children }) {
     navigate('/login')
   }
 
+  const iniciarSesion = (datos) => {
+    localStorage.setItem('access',  datos.access)
+    localStorage.setItem('refresh', datos.refresh)
+    localStorage.setItem('rol',     datos.rol)
+    localStorage.setItem('id',      datos.id)
+    setUsuario({ id: datos.id, rol: datos.rol })
+  }
+
   const resetTimer = () => {
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(cerrarSesion, INACTIVIDAD_MS)
@@ -43,7 +51,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ usuario, cerrarSesion }}>
+    <AuthContext.Provider value={{ usuario, iniciarSesion, cerrarSesion }}>
       {children}
     </AuthContext.Provider>
   )

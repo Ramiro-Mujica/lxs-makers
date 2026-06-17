@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usuariosService } from '../services/api'
+import { useAuth } from '../context/AuthContext'
 import '../styles/auth.css'
 
 function Login() {
-  const navigate  = useNavigate()
-  const [form, setForm]       = useState({ email: '', password: '' })
-  const [error, setError]     = useState('')
-  const [cargando, setCargando] = useState(false)
+  const navigate                    = useNavigate()
+  const { iniciarSesion }           = useAuth()
+  const [form, setForm]             = useState({ email: '', password: '' })
+  const [error, setError]           = useState('')
+  const [cargando, setCargando]     = useState(false)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -19,11 +21,7 @@ function Login() {
     setCargando(true)
     try {
       const res = await usuariosService.login(form)
-      localStorage.setItem('access',  res.data.access)
-      localStorage.setItem('refresh', res.data.refresh)
-      localStorage.setItem('rol',     res.data.rol)
-      localStorage.setItem('id',      res.data.id)
-
+      iniciarSesion(res.data)
       if (res.data.rol === 'administrador') {
         navigate('/admin/dashboard')
       } else {
