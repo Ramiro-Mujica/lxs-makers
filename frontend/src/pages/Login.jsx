@@ -1,6 +1,41 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { usuariosService } from '../services/api'
 import '../styles/auth.css'
 
 function Login() {
+  const navigate  = useNavigate()
+  const [form, setForm]       = useState({ email: '', password: '' })
+  const [error, setError]     = useState('')
+  const [cargando, setCargando] = useState(false)
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setCargando(true)
+    try {
+      const res = await usuariosService.login(form)
+      localStorage.setItem('access',  res.data.access)
+      localStorage.setItem('refresh', res.data.refresh)
+      localStorage.setItem('rol',     res.data.rol)
+      localStorage.setItem('id',      res.data.id)
+
+      if (res.data.rol === 'administrador') {
+        navigate('/admin/dashboard')
+      } else {
+        navigate('/vendedor/dashboard')
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Error al iniciar sesión.')
+    } finally {
+      setCargando(false)
+    }
+  }
+
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
@@ -12,17 +47,37 @@ function Login() {
 
         <h2 className="auth-title">Iniciar sesión</h2>
 
-        <div className="form-group">
-          <label>Email</label>
-          <input type="email" placeholder="tu@email.com" />
-        </div>
+        {error && <div className="auth-error">{error}</div>}
 
-        <div className="form-group">
-          <label>Contraseña</label>
-          <input type="password" placeholder="••••••••" />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="tu@email.com"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <button className="btn-auth">Ingresar</button>
+          <div className="form-group">
+            <label>Contraseña</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <button className="btn-auth" disabled={cargando}>
+            {cargando ? 'Ingresando...' : 'Ingresar'}
+          </button>
+        </form>
 
         <div className="auth-footer">
           <a href="/">Volver al inicio</a>

@@ -1,6 +1,39 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { usuariosService } from '../services/api'
 import '../styles/auth.css'
 
 function Registro() {
+  const navigate = useNavigate()
+  const [form, setForm]         = useState({ email: '', password: '', nombre_negocio: '', whatsapp: '' })
+  const [error, setError]       = useState('')
+  const [exito, setExito]       = useState('')
+  const [cargando, setCargando] = useState(false)
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setExito('')
+    setCargando(true)
+    try {
+      await usuariosService.registro(form)
+      setExito('Registro exitoso. Tu cuenta está pendiente de aprobación.')
+    } catch (err) {
+      const data = err.response?.data
+      if (data?.email) {
+        setError(data.email[0])
+      } else {
+        setError('Error al registrarse. Intentá de nuevo.')
+      }
+    } finally {
+      setCargando(false)
+    }
+  }
+
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
@@ -12,27 +45,60 @@ function Registro() {
 
         <h2 className="auth-title">Crear cuenta</h2>
 
-        <div className="form-group">
-          <label>Email</label>
-          <input type="email" placeholder="tu@email.com" />
-        </div>
+        {error && <div className="auth-error">{error}</div>}
+        {exito && <div className="auth-success">{exito}</div>}
 
-        <div className="form-group">
-          <label>Nombre del negocio</label>
-          <input type="text" placeholder="Mi tienda" />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="tu@email.com"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div className="form-group">
-          <label>WhatsApp</label>
-          <input type="text" placeholder="+54 9 11 1234 5678" />
-        </div>
+          <div className="form-group">
+            <label>Nombre del negocio</label>
+            <input
+              type="text"
+              name="nombre_negocio"
+              placeholder="Mi tienda"
+              value={form.nombre_negocio}
+              onChange={handleChange}
+            />
+          </div>
 
-        <div className="form-group">
-          <label>Contraseña</label>
-          <input type="password" placeholder="••••••••" />
-        </div>
+          <div className="form-group">
+            <label>WhatsApp</label>
+            <input
+              type="text"
+              name="whatsapp"
+              placeholder="+54 9 11 1234 5678"
+              value={form.whatsapp}
+              onChange={handleChange}
+            />
+          </div>
 
-        <button className="btn-auth">Registrarse</button>
+          <div className="form-group">
+            <label>Contraseña</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <button className="btn-auth" disabled={cargando}>
+            {cargando ? 'Registrando...' : 'Registrarse'}
+          </button>
+        </form>
 
         <div className="auth-footer">
           <a href="/">Volver al inicio</a>
