@@ -1,1 +1,0 @@
-web: gunicorn lxs_makers_back.wsgi --bind 0.0.0.0:$PORT
