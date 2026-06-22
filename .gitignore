@@ -1,0 +1,14 @@
+# Entornos virtuales y dependencias
+backend/venv/
+__pycache__/
+*.pyc
+
+# Variables de entorno (credenciales)
+.env
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Editor
+.vscode/
