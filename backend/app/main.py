@@ -1,12 +1,28 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 from sqlalchemy import text
 from app.database import engine
-from app.routers import usuarios, productos
+from app.routers import usuarios, productos, pedidos, estadisticas, tableros
+from app.security.auth import renovar_access_token
 
 app = FastAPI(title="LXS Makers API")
 
 app.include_router(usuarios.router, prefix="/api/usuarios", tags=["usuarios"])
 app.include_router(productos.router, prefix="/api/productos", tags=["productos"])
+app.include_router(pedidos.router, prefix="/api/pedidos", tags=["pedidos"])
+app.include_router(estadisticas.router, prefix="/api/pedidos", tags=["estadisticas"])
+app.include_router(tableros.router, prefix="/api/tableros", tags=["tableros"])
+
+
+class RefreshSchema(BaseModel):
+    refresh: str
+
+
+@app.post("/api/token/refresh/")
+def token_refresh(datos: RefreshSchema):
+    """Reemplaza a TokenRefreshView de SimpleJWT."""
+    nuevo_access = renovar_access_token(datos.refresh)
+    return {"access": nuevo_access}
 
 
 @app.get("/")

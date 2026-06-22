@@ -10,8 +10,8 @@ from app.database import get_db
 from app.models.usuario import Usuario
 
 ALGORITMO = "HS256"
-MINUTOS_ACCESS_TOKEN = 60   # 1 hora, igual que tenías en Django
-DIAS_REFRESH_TOKEN = 7      # igual que tenías en Django
+MINUTOS_ACCESS_TOKEN = 480
+DIAS_REFRESH_TOKEN = 7      
 
 esquema_bearer = HTTPBearer()
 

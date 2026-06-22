@@ -2,11 +2,12 @@ import logging
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.producto import Producto, Variante
+from app.models.producto import Producto, Variante, ImagenProducto
 from app.models.usuario import Usuario
 from app.schemas.producto import (
     ProductoPublicoSchema,
@@ -15,11 +16,20 @@ from app.schemas.producto import (
     ProductoUpdateSchema,
     VarianteSchema,
     VarianteCreateSchema,
+    ImagenProductoSchema,
 )
 from app.security.auth import obtener_usuario_actual
+from app.services.imagen_service import convertir_y_subir, eliminar_imagen_storage
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+MAX_IMAGENES = 5
+TAMANIO_MAXIMO_BYTES = 2 * 1024 * 1024  # 2MB
+
+
+class OrdenImagenSchema(BaseModel):
+    orden: int
 
 
 def _obtener_producto_del_vendedor(producto_id: UUID, usuario: Usuario, db: Session) -> Producto:
@@ -124,6 +134,81 @@ def eliminar_variante(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Variante no encontrada.")
     db.delete(variante)
     db.commit()
+
+
+@router.post("/{producto_id}/imagenes", response_model=ImagenProductoSchema, status_code=status.HTTP_201_CREATED)
+async def agregar_imagen(
+    producto_id: UUID,
+    imagen: UploadFile = File(...),
+    orden: int = Form(None),
+    usuario: Usuario = Depends(obtener_usuario_actual),
+    db: Session = Depends(get_db),
+):
+    producto = _obtener_producto_del_vendedor(producto_id, usuario, db)
+
+    if len(producto.imagenes) >= MAX_IMAGENES:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Máximo {MAX_IMAGENES} imágenes por producto.")
+
+    contenido = await imagen.read()
+    if len(contenido) > TAMANIO_MAXIMO_BYTES:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "La imagen no puede superar 2MB.")
+
+    url = convertir_y_subir(contenido, str(usuario.id), str(producto_id))
+
+    orden_final = orden if orden is not None else len(producto.imagenes)
+    nueva_imagen = ImagenProducto(producto_id=producto.id, url=url, orden=orden_final)
+    db.add(nueva_imagen)
+    db.commit()
+    db.refresh(nueva_imagen)
+    return nueva_imagen
+
+
+@router.delete("/{producto_id}/imagenes/{imagen_id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_imagen(
+    producto_id: UUID,
+    imagen_id: UUID,
+    usuario: Usuario = Depends(obtener_usuario_actual),
+    db: Session = Depends(get_db),
+):
+    producto = _obtener_producto_del_vendedor(producto_id, usuario, db)
+    imagen = (
+        db.query(ImagenProducto)
+        .filter(ImagenProducto.id == imagen_id, ImagenProducto.producto_id == producto.id)
+        .first()
+    )
+    if not imagen:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No encontrado.")
+
+    eliminar_imagen_storage(imagen.url)
+    db.delete(imagen)
+    db.commit()
+
+
+@router.patch("/{producto_id}/imagenes/{imagen_id}/orden")
+def actualizar_orden_imagen(
+    producto_id: UUID,
+    imagen_id: UUID,
+    datos: OrdenImagenSchema,
+    usuario: Usuario = Depends(obtener_usuario_actual),
+    db: Session = Depends(get_db),
+):
+    producto = _obtener_producto_del_vendedor(producto_id, usuario, db)
+    imagen = (
+        db.query(ImagenProducto)
+        .filter(ImagenProducto.id == imagen_id, ImagenProducto.producto_id == producto.id)
+        .first()
+    )
+    if not imagen:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No encontrado.")
+
+    if datos.orden == 0:
+        db.query(ImagenProducto).filter(ImagenProducto.producto_id == producto.id).update(
+            {ImagenProducto.orden: ImagenProducto.orden + 1}
+        )
+
+    imagen.orden = datos.orden
+    db.commit()
+    return {"mensaje": "Orden actualizado."}
 
 
 @router.get("/catalogo/{codigo_catalogo}")

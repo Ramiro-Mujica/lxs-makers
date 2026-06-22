@@ -90,6 +90,40 @@ def actualizar_perfil(
     return {"mensaje": "Perfil actualizado correctamente."}
 
 
+@router.get("/resumen")
+def resumen_vendedor(
+    usuario: Usuario = Depends(obtener_usuario_actual),
+    db: Session = Depends(get_db),
+):
+    """Datos para el dashboard del vendedor: contadores de pedidos y productos."""
+    from datetime import datetime, timedelta, timezone
+    from app.models.pedido import Pedido
+    from app.models.producto import Producto
+
+    hace_7_dias = datetime.now(timezone.utc) - timedelta(days=7)
+
+    pedidos_activos = db.query(Pedido).filter(
+        Pedido.vendedor_id == usuario.id,
+        Pedido.created_at >= hace_7_dias,
+    )
+
+    productos = db.query(Producto).filter(Producto.vendedor_id == usuario.id)
+
+    return {
+        "nombre_negocio": usuario.nombre_negocio or "-",
+        "codigo_catalogo": usuario.codigo_catalogo,
+        "whatsapp": usuario.whatsapp or "-",
+        "pedidos_pendientes": pedidos_activos.filter(Pedido.estado == "pendiente").count(),
+        "pedidos_en_proceso": pedidos_activos.filter(Pedido.estado == "en_proceso").count(),
+        "pedidos_enviados": pedidos_activos.filter(Pedido.estado == "enviado").count(),
+        "pedidos_completados": pedidos_activos.filter(Pedido.estado == "completado").count(),
+        "total_productos": productos.count(),
+        "productos_visibles": productos.filter(Producto.estado == "visible").count(),
+        "productos_sin_stock": productos.filter(Producto.estado == "sin_stock").count(),
+        "productos_ocultos": productos.filter(Producto.estado == "oculto").count(),
+    }
+
+
 @router.get("/vendedores", response_model=List[UsuarioPerfilSchema])
 def listar_vendedores(
     _admin: Usuario = Depends(requerir_administrador),
