@@ -19,6 +19,7 @@ from app.schemas.producto import (
     ImagenProductoSchema,
 )
 from app.security.auth import obtener_usuario_actual
+from app.services.orden_catalogo import obtener_estrategia
 from app.services.imagen_service import convertir_y_subir, eliminar_imagen_storage
 
 logger = logging.getLogger(__name__)
@@ -212,8 +213,10 @@ def actualizar_orden_imagen(
 
 
 @router.get("/catalogo/{codigo_catalogo}")
-def catalogo_publico(codigo_catalogo: str, db: Session = Depends(get_db)):
-    """Endpoint público — no requiere login. Lo usa el cliente final."""
+def catalogo_publico(codigo_catalogo: str, orden: str = "defecto", db: Session = Depends(get_db)):
+    """Endpoint público — no requiere login. Lo usa el cliente final.
+    El parámetro 'orden' admite: defecto, precio_asc, precio_desc.
+    """
     vendedor = (
         db.query(Usuario)
         .filter(Usuario.codigo_catalogo == codigo_catalogo, Usuario.estado == "activo")
@@ -228,8 +231,11 @@ def catalogo_publico(codigo_catalogo: str, db: Session = Depends(get_db)):
         .all()
     )
 
+    estrategia = obtener_estrategia(orden)
+    productos_ordenados = estrategia.ordenar(productos_visibles)
+
     return {
         "negocio": vendedor.nombre_negocio,
         "whatsapp": vendedor.whatsapp,
-        "productos": [ProductoPublicoSchema.model_validate(p) for p in productos_visibles],
+        "productos": [ProductoPublicoSchema.model_validate(p) for p in productos_ordenados],
     }

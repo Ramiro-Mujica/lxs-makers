@@ -1,4 +1,5 @@
 import logging
+from app.services.notificaciones import notificador_pedidos
 from datetime import datetime, timedelta, timezone
 from typing import List
 from uuid import UUID
@@ -102,7 +103,7 @@ def actualizar_pedido(
 
     if estado_anterior != "completado" and pedido.estado == "completado":
         pedido.completado_at = datetime.now(timezone.utc)
-        logger.info(f"Pedido {pedido.codigo_seguimiento} completado")
+        notificador_pedidos.notificar_pedido_completado(pedido)
 
     db.commit()
     db.refresh(pedido)
